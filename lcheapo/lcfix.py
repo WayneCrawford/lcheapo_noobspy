@@ -2,6 +2,7 @@
 "lcFix.py --  Fix errors in lcheapo files."
 
 from __future__ import print_function
+import sdpchain
 from lcheapo import *
 import argparse
 import Queue
@@ -112,7 +113,8 @@ def main():
       responseQ = Queue.Queue(0)
 
       # SET UP FILE NAMES and PATHs
-      in_filename_path,in_filename_root,out_filename_path,out_filename_root=__setup_paths(args)
+      in_filename_path,in_filename_root,out_filename_path,out_filename_root=\
+            sdpchain.setup_paths(args)
       __makeLogger(os.path.join(out_filename_path,out_filename_root+'.fix.txt')) 
       if args.dryrun:
             logging.info("DRY RUN: will not output a new file (useful for verifying that no errors remain)")
@@ -190,31 +192,12 @@ def main():
                 returnCode=0
             else:
                 returnCode=2
-            __makeProcessStepsFile(startTimeStr,args,outFiles,msgs,0)
+            sdpchain.make_process_steps_file(startTimeStr,args,outFiles,
+                                                msgs,0)
 
       #oftext.close()
       sys.exit(0)
 
-##############################################################################
-def __setup_paths(args):
-    if os.path.isabs(args.input_directory):
-        in_filename_path=args.input_directory
-    else:
-        in_filename_path=os.path.join(args.base_directory,args.input_directory)
-    in_filename_root=args.infiles[0].split('.')[0]
-    if os.path.isabs(args.output_directory):
-        out_filename_path=args.output_directory
-    else:
-        out_filename_path=os.path.join(args.base_directory,args.output_directory)
-    if not os.path.exists(out_filename_path):
-        print("output directory '{}' does not exist, creating...".format(out_filename_path))
-        os.mkdir(out_filename_path)
-    elif not os.path.isdir(out_filename_path):
-        print("output directory '{}' is a file!, changing to base directory".format(out_filename_path))
-        out_filename_path=args.base_directory
-    out_filename_root=in_filename_root
-
-    return in_filename_path,in_filename_root,out_filename_path,out_filename_root
 ##############################################################################
 # Name      : getOptions
 # Purpose     : To obtain the command line options (if any are given)
@@ -312,63 +295,6 @@ def getTimeDelta(floatTimeInSec):
 
   return datetime.timedelta(days, seconds, 0, msec, minutes, hours)
 
-
-##############################################################################
-# Name        : makeProcessStepsFile
-# Purpose     : Make or append to a JSON file used by all datafile
-#               processing programs.  This file is named "process-steps.json"
-# Inputs      : startTimeStr  - A string containing the program start time
-#               parameters - a list of program parameters
-#               inFiles - a list of input files
-#               outFiles - a list of output files
-#               msgs - a list of messages about the data processing (one per input
-#                      file)
-#               returnCode: 0 for no error, others not yet defined
-# Outputs     : file process-steps.json
-# Bidirectional : none
-# Returns     : none
-# Notes       : none
-##############################################################################
-def __makeProcessStepsFile(startTimeStr,args,outFiles,msgs,returnCode,debug=False) :
-
-  parameters=copy.deepcopy(vars(args))
-  del parameters['infiles']
-
-  application={
-    'name':"lcFix.py",
-    'description':"Fix common bugs in LCHEAPO data files",
-    'version':versionString
-  }
-  execution=  {
-    'commandline':" ".join(sys.argv),
-    'date':        startTimeStr,
-    'messages':    msgs,
-    'parameters':  parameters,
-    'tools' :      [],
-    'return_code': returnCode
-  }
-  execution['parameters']['input_files']=args.infiles
-  execution['parameters']['output_files']=outFiles
-  step = {'application':application,'execution':execution}
-  if debug:
-    print(json.dumps(step, indent=4, separators=(',', ': ')))
-  filename=os.path.join(args.base_directory,'process-steps.json')
-  try:
-    fp=open(filename,"r")
-  except:  # File not found
-    tree={"steps":[step]}
-  else:   # File found
-    tree=json.load(fp)
-    if 'steps' in tree: 
-       tree['steps'].append(step)
-    else:
-      tree['steps']=[step]
-    fp.close() 
-  if debug:
-    json.dumps(tree, indent=4, separators=(',', ': '));  # For testing
-  fp=open(filename,"w")
-  json.dump(tree,fp,sort_keys=True, indent=2);  # For real
-  fp.close
 
 ##############################################################################
 # Name      : __convertToMSec
