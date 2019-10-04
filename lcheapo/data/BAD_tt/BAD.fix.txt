@@ -1,0 +1,63 @@
+INFO ============== PROCESSING FILE BAD.bad.lch =============
+INFO   data Blocks: first=3824, last=9999
+INFO   PROCESSING FILE
+WARNING     4336: Time Tear in Data.   CH0 Expected Time: 2019-07-22 22:41:19.936000, Got: 2019-07-22 22:35:39.968000
+WARNING     4337: Time Tear in Data.   CH1 Expected Time: 2019-07-22 22:41:19.936000, Got: 2019-07-22 22:35:39.968000
+WARNING     4338: Time Tear in Data.   CH2 Expected Time: 2019-07-22 22:41:19.936000, Got: 2019-07-22 22:35:39.968000
+WARNING     4339: Time Tear in Data.   CH3 Expected Time: 2019-07-22 22:41:19.936000, Got: 2019-07-22 22:35:39.968000
+WARNING     4848: Time Tear in Data.   CH0 Expected Time: 2019-07-22 22:41:19.936000, Got: 2019-07-22 22:46:59.904000
+WARNING     4849: Time Tear in Data.   CH1 Expected Time: 2019-07-22 22:41:19.936000, Got: 2019-07-22 22:46:59.904000
+WARNING     4850: Time Tear in Data.   CH2 Expected Time: 2019-07-22 22:41:19.936000, Got: 2019-07-22 22:46:59.904000
+WARNING     4851: Time Tear in Data.   CH3 Expected Time: 2019-07-22 22:41:19.936000, Got: 2019-07-22 22:46:59.904000
+WARNING     5360: Time Tear in Data.   CH0 Expected Time: 2019-07-22 22:52:39.872000, Got: 2019-07-22 22:46:59.904000
+WARNING     5361: Time Tear in Data.   CH1 Expected Time: 2019-07-22 22:52:39.872000, Got: 2019-07-22 22:46:59.904000
+WARNING     5362: Time Tear in Data.   CH2 Expected Time: 2019-07-22 22:52:39.872000, Got: 2019-07-22 22:46:59.904000
+WARNING     5363: Time Tear in Data.   CH3 Expected Time: 2019-07-22 22:52:39.872000, Got: 2019-07-22 22:46:59.904000
+WARNING     5872: Time Tear in Data.   CH0 Expected Time: 2019-07-22 22:52:39.872000, Got: 2019-07-22 22:58:19.840000
+WARNING     5873: Time Tear in Data.   CH1 Expected Time: 2019-07-22 22:52:39.872000, Got: 2019-07-22 22:58:19.840000
+WARNING     5874: Time Tear in Data.   CH2 Expected Time: 2019-07-22 22:52:39.872000, Got: 2019-07-22 22:58:19.840000
+WARNING     5875: Time Tear in Data.   CH3 Expected Time: 2019-07-22 22:52:39.872000, Got: 2019-07-22 22:58:19.840000
+WARNING     6384: Time Tear in Data.   CH0 Expected Time: 2019-07-22 23:03:59.808000, Got: 2019-07-22 22:58:19.840000
+WARNING     6385: Time Tear in Data.   CH1 Expected Time: 2019-07-22 23:03:59.808000, Got: 2019-07-22 22:58:19.840000
+WARNING     6386: Time Tear in Data.   CH2 Expected Time: 2019-07-22 23:03:59.808000, Got: 2019-07-22 22:58:19.840000
+WARNING     6387: Time Tear in Data.   CH3 Expected Time: 2019-07-22 23:03:59.808000, Got: 2019-07-22 22:58:19.840000
+WARNING     6896: Time Tear in Data.   CH0 Expected Time: 2019-07-22 23:03:59.808000, Got: 2019-07-22 23:09:39.776000
+WARNING     6897: Time Tear in Data.   CH1 Expected Time: 2019-07-22 23:03:59.808000, Got: 2019-07-22 23:09:39.776000
+WARNING     6898: Time Tear in Data.   CH2 Expected Time: 2019-07-22 23:03:59.808000, Got: 2019-07-22 23:09:39.776000
+WARNING     6899: Time Tear in Data.   CH3 Expected Time: 2019-07-22 23:03:59.808000, Got: 2019-07-22 23:09:39.776000
+WARNING     7408: Time Tear in Data.   CH0 Expected Time: 2019-07-22 23:15:19.744000, Got: 2019-07-22 23:09:39.776000
+WARNING     7409: Time Tear in Data.   CH1 Expected Time: 2019-07-22 23:15:19.744000, Got: 2019-07-22 23:09:39.776000
+WARNING     7410: Time Tear in Data.   CH2 Expected Time: 2019-07-22 23:15:19.744000, Got: 2019-07-22 23:09:39.776000
+WARNING     7411: Time Tear in Data.   CH3 Expected Time: 2019-07-22 23:15:19.744000, Got: 2019-07-22 23:09:39.776000
+WARNING     7920: Time Tear in Data.   CH0 Expected Time: 2019-07-22 23:15:19.744000, Got: 2019-07-22 23:20:59.712000
+WARNING     7921: Time Tear in Data.   CH1 Expected Time: 2019-07-22 23:15:19.744000, Got: 2019-07-22 23:20:59.712000
+WARNING     7922: Time Tear in Data.   CH2 Expected Time: 2019-07-22 23:15:19.744000, Got: 2019-07-22 23:20:59.712000
+WARNING     7923: Time Tear in Data.   CH3 Expected Time: 2019-07-22 23:15:19.744000, Got: 2019-07-22 23:20:59.712000
+WARNING     8432: Time Tear in Data.   CH0 Expected Time: 2019-07-22 23:26:39.680000, Got: 2019-07-22 23:20:59.712000
+WARNING     8433: Time Tear in Data.   CH1 Expected Time: 2019-07-22 23:26:39.680000, Got: 2019-07-22 23:20:59.712000
+WARNING     8434: Time Tear in Data.   CH2 Expected Time: 2019-07-22 23:26:39.680000, Got: 2019-07-22 23:20:59.712000
+WARNING     8435: Time Tear in Data.   CH3 Expected Time: 2019-07-22 23:26:39.680000, Got: 2019-07-22 23:20:59.712000
+WARNING     8944: Time Tear in Data.   CH0 Expected Time: 2019-07-22 23:26:39.680000, Got: 2019-07-22 23:32:19.648000
+WARNING     8945: Time Tear in Data.   CH1 Expected Time: 2019-07-22 23:26:39.680000, Got: 2019-07-22 23:32:19.648000
+WARNING     8946: Time Tear in Data.   CH2 Expected Time: 2019-07-22 23:26:39.680000, Got: 2019-07-22 23:32:19.648000
+WARNING     8947: Time Tear in Data.   CH3 Expected Time: 2019-07-22 23:26:39.680000, Got: 2019-07-22 23:32:19.648000
+WARNING     9456: Time Tear in Data.   CH0 Expected Time: 2019-07-22 23:37:59.616000, Got: 2019-07-22 23:32:19.648000
+WARNING     9457: Time Tear in Data.   CH1 Expected Time: 2019-07-22 23:37:59.616000, Got: 2019-07-22 23:32:19.648000
+WARNING     9458: Time Tear in Data.   CH2 Expected Time: 2019-07-22 23:37:59.616000, Got: 2019-07-22 23:32:19.648000
+WARNING     9459: Time Tear in Data.   CH3 Expected Time: 2019-07-22 23:37:59.616000, Got: 2019-07-22 23:32:19.648000
+WARNING     9968: Time Tear in Data.   CH0 Expected Time: 2019-07-22 23:37:59.616000, Got: 2019-07-22 23:43:39.584000
+WARNING     9969: Time Tear in Data.   CH1 Expected Time: 2019-07-22 23:37:59.616000, Got: 2019-07-22 23:43:39.584000
+WARNING     9970: Time Tear in Data.   CH2 Expected Time: 2019-07-22 23:37:59.616000, Got: 2019-07-22 23:43:39.584000
+WARNING     9971: Time Tear in Data.   CH3 Expected Time: 2019-07-22 23:37:59.616000, Got: 2019-07-22 23:43:39.584000
+INFO   BAD.bad.lch=>./BAD_tt/BAD.fix.lch: Finished at block 9999 (0 BUG1s, 0 BUG2s, 48 Time Tears, 0 unexpected header values)
+INFO 
+  DIR2, LAST BLOCK (10000) IS BEYOND THE END OF FILE!
+INFO   REDUCING NUMBER OF DIRECTORY ENTRIES IN HEADER FROM 229 TO 1
+INFO =================================================================================================
+INFO Overall totals: 1 files, 0 BUG1s, 0 BUG2s, 48 Time Tears, 0 unexpected header values
+INFO   Time Tear=Bad time tag (BUG1 or BUG2) for more than two consecutive samples.  Could be long
+INFO       stretch of bad records or an offset in records (must be fixed)
+WARNING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+WARNING YOU HAVE 48 TIME TEARS: YOU MUST ELIMINATE THEM BEFORE CONTINUING!!!
+WARNING Use "lcdump.py OBSfile..raw.lch STARTBLOCK NUMBLOCKS" to look at suspect sections
+WARNING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

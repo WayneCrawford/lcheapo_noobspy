@@ -1,0 +1,64 @@
+{
+  "steps": [
+    {
+      "application": {
+        "description": "Fix common bugs in LCHEAPO data files", 
+        "name": "lcFix.py", 
+        "version": "0.66"
+      }, 
+      "execution": {
+        "commandline": "/opt/lcheapo/bin/lcfix BUGGY.raw.lch", 
+        "date": "2019-10-04T12:59:27", 
+        "messages": [
+          "  BUGGY.raw.lch=>././BUGGY.fix.lch: Finished at block 9999 (52 BUG1s, 0 BUG2s, 0 Time Tears, 0 unexpected header values)"
+        ], 
+        "parameters": {
+          "base_directory": ".", 
+          "dryrun": false, 
+          "forceTime": false, 
+          "input_directory": ".", 
+          "input_files": [
+            "BUGGY.raw.lch"
+          ], 
+          "output_directory": ".", 
+          "output_files": [
+            "././BUGGY.fix.lch"
+          ], 
+          "verbosity": 0
+        }, 
+        "return_code": 0, 
+        "tools": []
+      }
+    }, 
+    {
+      "application": {
+        "description": "Fix common bugs in LCHEAPO data files", 
+        "name": "lcFix.py", 
+        "version": "0.66"
+      }, 
+      "execution": {
+        "commandline": "/opt/lcheapo/bin/lcfix --forceTimes BAD.bad.lch", 
+        "date": "2019-10-04T13:01:14", 
+        "messages": [
+          "  BAD.bad.lch=>././BAD.fix.lch: Finished at block 9999 (3072 time errors FORCEABLY corrected)"
+        ], 
+        "parameters": {
+          "base_directory": ".", 
+          "dryrun": false, 
+          "forceTime": true, 
+          "input_directory": ".", 
+          "input_files": [
+            "BAD.bad.lch"
+          ], 
+          "output_directory": ".", 
+          "output_files": [
+            "././BAD.fix.lch"
+          ], 
+          "verbosity": 0
+        }, 
+        "return_code": 0, 
+        "tools": []
+      }
+    }
+  ]
+}

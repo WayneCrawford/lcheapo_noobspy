@@ -8,7 +8,7 @@ with open("lcheapo/version.py") as fp:
     exec(fp.read(),version)
 
 setuptools.setup(
-    name="seaplan",
+    name="lcheapo",
     version=version['__version__'],
     author="Wayne Crawford",
     author_email="crawford@ipgp.fr",
@@ -27,7 +27,7 @@ setuptools.setup(
              'lcheader=lcheapo.lcheader:main'
          ]
     },
-    python_requires='==2.7',
+    python_requires='~=2.7',
     classifiers=(
         "Development Status :: 4 - Beta",
         "Environment :: Console",
