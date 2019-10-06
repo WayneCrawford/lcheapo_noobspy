@@ -1,0 +1,15 @@
+INFO ============== PROCESSING FILE BUGGY.raw.lch =============
+INFO   data Blocks: first=3824, last=9999
+INFO   PROCESSING FILE
+INFO     3876: LCHEAPO BUG #1. CH0 Expected Time: 2019-07-20 11:00:34.536000, Got: 2019-07-20 11:00:33.536000 
+INFO     3877: LCHEAPO BUG #1. CH1 Expected Time: 2019-07-20 11:00:34.536000, Got: 2019-07-20 11:00:33.536000 
+INFO     3878: LCHEAPO BUG #1. CH2 Expected Time: 2019-07-20 11:00:34.536000, Got: 2019-07-20 11:00:33.536000 
+INFO     3879: LCHEAPO BUG #1. CH3 Expected Time: 2019-07-20 11:00:34.536000, Got: 2019-07-20 11:00:33.536000 
+INFO     4376: LCHEAPO BUG #3. BUG #1s repeating at 500-block intervals
+INFO   BUGGY.raw.lch=>BUGGY.fix.lch: Finished at block 9999 (52 BUG1s, 0 BUG2s, 0 Time Tears, 0 unexpected header values)
+INFO 
+  DIR2, LAST BLOCK (10000) IS BEYOND THE END OF FILE!
+INFO   REDUCING NUMBER OF DIRECTORY ENTRIES IN HEADER FROM 250 TO 1
+INFO =================================================================================================
+INFO Overall totals: 1 files, 52 BUG1s, 0 BUG2s, 0 Time Tears, 0 unexpected header values
+INFO   BUG1= 1-second errors in time tag

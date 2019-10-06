@@ -1,0 +1,30 @@
+{
+  "steps": [
+    {
+      "application": {
+        "description": "Fix common bugs in LCHEAPO data files", 
+        "name": "lcfix", 
+        "version": "0.66"
+      }, 
+      "execution": {
+        "commandline": "/opt/lcheapo/bin/lcfix BUGGY.raw.lch", 
+        "messages": [
+          "  BUGGY.raw.lch=>BUGGY.fix.lch: Finished at block 9999 (52 BUG1s, 0 BUG2s, 0 Time Tears, 0 unexpected header values)"
+        ], 
+        "parameters": {
+          "dryrun": false, 
+          "forceTime": false, 
+          "input_files": [
+            "BUGGY.raw.lch"
+          ], 
+          "output_files": [
+            "BUGGY.fix.lch"
+          ], 
+          "verbosity": 0
+        }, 
+        "return_code": 0, 
+        "tools": []
+      }
+    }
+  ]
+}

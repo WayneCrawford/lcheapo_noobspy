@@ -1,0 +1,34 @@
+{
+  "steps": [
+    {
+      "application": {
+        "description": "Fix common bugs in LCHEAPO data files", 
+        "name": "lcfix", 
+        "version": "0.66"
+      }, 
+      "execution": {
+        "commandline": "/opt/lcheapo/bin/lcfix --forceTimes BAD.bad.lch", 
+        "date": "2019-10-04T13:01:14", 
+        "messages": [
+          "  BAD.bad.lch=>BAD.fix.lch: Finished at block 9999 (0 BUG1s, 0 BUG2s, 48 Time Tears, 0 unexpected header values)"
+        ], 
+        "parameters": {
+          "base_directory": ".", 
+          "dryrun": false, 
+          "forceTime": false, 
+          "input_directory": ".", 
+          "input_files": [
+            "BAD.bad.lch"
+          ], 
+          "output_directory": ".", 
+          "output_files": [
+            "BAD.fix.timetears.txt"
+          ], 
+          "verbosity": 0
+        }, 
+        "return_code": -1, 
+        "tools": []
+      }
+    }
+  ]
+}

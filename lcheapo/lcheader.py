@@ -28,6 +28,8 @@ def __getOptions():
                       help="Print disk header", default=False)
     parser.add_option("--dry_run", action = "store_true",
                       help="don't save to disk", default=False)
+    parser.add_option("--no_questions", action = "store_true",
+                      help="just make a generic header, no questions", default=False)
     parser.add_option("-i", "--input_file",help="input header file to modify")
     (opts, arguments) = parser.parse_args()
     
@@ -44,7 +46,7 @@ def main(opts):
         h=__read_header(opts.input_file)
     else:
         h=__generic_header()
-    h,params=__get_parameters(h)
+    h,params=__get_parameters(h,opts.no_questions)
     if opts.dry_run:
         return(2)
     with open(params['filename_prefix']+'.header.raw.lch', 'w') as fp:
@@ -82,13 +84,13 @@ def main(opts):
     return(0)
             
 ##############################################################################
-def __get_parameters(h):
+def __get_parameters(h,no_questions=False):
     """Imitate LCHEAPO parameter menu, return values"""
     params=dict(wake_time=datetime(2017,01,01,05,00,00),
                 end_time= datetime(2018,01,01,05,00,00),
                 filename_prefix="generic"
             )
-    while not __validate_params(h,params):
+    while not __validate_params(h,params,no_questions):
         h.description =             __get_string("Description (Cruise_InstModel_SN_Site)",
                                             h.description)
         h.sampleRate =              __get_int("Sample Rate",h.sampleRate,\
@@ -111,8 +113,11 @@ def __get_parameters(h):
     return h,params
 
 ##############################################################################
-def __validate_params(h,params):
+def __validate_params(h,params,no_questions):
     """Validate header parameters"""
+    if no_questions:
+        return True
+    
     print('**** PARAMETERS ****')
     print('            Description: {}'.format(h.description))
     print('            Sample Rate: {:d} ({:.1f} real)'.format(h.sampleRate,h.realSampleRate))

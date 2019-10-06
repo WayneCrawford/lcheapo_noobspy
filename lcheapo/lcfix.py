@@ -88,15 +88,7 @@ VERSIONS = """    VERSIONS
 """
 warnings=0  # count # of warnings
         
-##############################################################################
-# Name      : main
-# Purpose     : -
-# Inputs    : -
-# Outputs     : -
-# Bidirectional : -
-# Returns     : -
-# Notes     : -
-##############################################################################
+
 def main():
 
       global warnings
@@ -113,8 +105,10 @@ def main():
       responseQ = Queue.Queue(0)
 
       # SET UP FILE NAMES and PATHs
-      in_filename_path,in_filename_root,out_filename_path,out_filename_root=\
-            sdpchain.setup_paths(args)
+      in_filename_path,out_filename_path = sdpchain.setup_paths(args)
+      in_filename_root = args.infiles[0].split('.')[0]    
+      out_filename_root = in_filename_root
+      
       __makeLogger(os.path.join(out_filename_path,out_filename_root+'.fix.txt')) 
       if args.dryrun:
             logging.info("DRY RUN: will not output a new file (useful for verifying that no errors remain)")
@@ -187,28 +181,35 @@ def main():
     
       __printFinalMessage(args.forceTime, counters)  
 
+      returnCode=0
       if not args.dryrun:
-            if warnings==0:
-                returnCode=0
-            else:
-                returnCode=2
-            sdpchain.make_process_steps_file(startTimeStr,args,outFiles,
-                                                msgs,0)
+            if counters['iTT']:
+                returnCode=-1
+            elif not warnings == 0:
+                returnCode = 2
+            parameters = copy.deepcopy(vars(args))
+            del parameters['infiles']
+            parameters['input_files'] = args.infiles
+            parameters['output_files'] = [os.path.split(x)[1] for x in outFiles]
 
-      #oftext.close()
-      sys.exit(0)
+            sdpchain.make_process_steps_file(
+                'lcfix',
+                'Fix common bugs in LCHEAPO data files',
+                versionString,
+                " ".join(sys.argv),
+                startTimeStr,
+                returnCode,
+                args.base_directory,
+                exec_messages=msgs,
+                exec_parameters=parameters)
 
-##############################################################################
-# Name      : getOptions
-# Purpose     : To obtain the command line options (if any are given)
-# Inputs    : none
-# Outputs     : none
-# Bidirectional : none
-# Returns     : 
-# Notes     : Uses the optparse library functions
-##############################################################################
+      sys.exit(returnCode)
+
+
 def getOptions():
-  "Parse user passed options and parameters."
+  """
+  Parse user passed options and parameters.
+  """
   
   parser = argparse.ArgumentParser(description="Fix common LCHEAPO bugs",
     epilog=textwrap.dedent("""\
@@ -239,9 +240,7 @@ def getOptions():
       > lcFix.py RR38.raw.lch
       > lcFix.py -v --dryrun RR38.fix.lch > RR38-verify.txt
 """),
-  formatter_class=argparse.RawDescriptionHelpFormatter)
-  
-  
+  formatter_class=argparse.RawDescriptionHelpFormatter)  
   parser.add_argument("infiles", metavar="inFileName", nargs='+',               
             help="Input filename(s)")
   parser.add_argument("--version",                                                action='version', version='%(prog)s {:s}'.format(versionString))
@@ -257,58 +256,43 @@ def getOptions():
             help="directory for output fixed LCHEAPO files (absolute path, or relative to base directory)")
   parser.add_argument("-F", "--forceTimes",dest="forceTime",       default=False, action = "store_true", 
             help="Force times to be consecutive (use only if time tear identified but proven false by synchronizing events before and after)")
-  #   parser.add_argument("-o", "--outfile", dest="outfile",
-  #             help="Force output (fixed) file name (only works if one input file)")
   args = parser.parse_args()
   
   return args
 
 
-##############################################################################
-# Name      : getTimeDelta
-# Purpose     : Convert a floating point number, representing a time offset in
-#         seconds, into a datetime.timedelta object.
-#         corresponding to the number of milliseconds.
-# Inputs    : floatTimeInSec  - Floating point number holding the number of
-#                   seconds.  The fractional part will correspond
-#                   to milliseconds.
-# Outputs     : none
-# Bidirectional : none
-# Returns     : A datetime.timedelta object.
-# Notes     : none
-##############################################################################
-def getTimeDelta(floatTimeInSec):
-  "Return a timedelta() object correspoding to the seconds passed into the function."
-  days = int (floatTimeInSec / 86400)
-  floatTimeInSec -= days * 86400
+def getTimeDelta(seconds=0.):
+    """
+    Convert seconds to a timedelta() object
 
-  hours = int (floatTimeInSec / 3600)
-  floatTimeInSec -= hours * 3600
-
-  minutes = int (floatTimeInSec/60)
-  floatTimeInSec -= minutes * 60
-  
-  seconds = int (floatTimeInSec)
-  floatTimeInSec -= seconds
-
-  msec = int (floatTimeInSec) * 1000
-
-  return datetime.timedelta(days, seconds, 0, msec, minutes, hours)
+    :param seconds: the number of seconds
+    :type  seconds: float
+    :return: timedelta
+    :rtype:  class datetime.timedelta
+    """
+    days = int (seconds / 86400)
+    seconds -= days * 86400
+    hours = int (seconds / 3600)
+    seconds -= hours * 3600
+    minutes = int (seconds/60)
+    seconds -= minutes * 60  
+    int_secs = int (seconds)
+    seconds -= int_secs
+    msec = int (seconds * 1000)
+    return datetime.timedelta(days=days, hours=hours, minutes=minutes,
+                              seconds=seconds, milliseconds=msec)
 
 
-##############################################################################
-# Name      : __convertToMSec
-# Purpose     : Convert a datetime.timedelta object into corresponding number
-#         of milliseconds.
-# Inputs    : tm   -  datetime.timedelta() object
-# Outputs     : none
-# Bidirectional : none
-# Returns     : int  -  milliseconds
-# Notes     : none
-##############################################################################
 def __convertToMSec(tm):
-  "Given a timedelta() object return the corresponding number of milliseconds."
-  return ((tm.days * 86400) + (tm.seconds)) * 1000 + int (tm.microseconds/1000)
+    """
+    Return the number of milliseconds corresponding to a timedelta object
+
+    :param tm: timedelta
+    :type  tm: class datetime.timedelta
+    :return: milliseconds
+    :rtype: int
+    """
+    return ((tm.days * 86400) + (tm.seconds)) * 1000 + int (tm.microseconds/1000)
 
   
 def __stopProcess(commandQ):
@@ -350,9 +334,8 @@ def __printFinalMessage(forceTime, counters)   :
     if counters['iTT']>0:
       logging.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" )
       logging.warning("YOU HAVE {:d} TIME TEARS: YOU MUST ELIMINATE THEM BEFORE CONTINUING!!!".format(counters['iTT']))
-      logging.warning('Use "lcdump.py OBSfile..raw.lch STARTBLOCK NUMBLOCKS" to look at suspect sections')
+      logging.warning('Use "lcdump.py OBSfile.*.lch STARTBLOCK NUMBLOCKS" to look at suspect sections')
       logging.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" )
-      sys.exit(-1)
   else:  # Forced time corrections
     logging.warning("FORCED TIME CORRECTIONS, NO EVALUATION OF BUG1s and BUG2s ")
     logging.warning("(should have run this on a previously fixed file with only false time tears left)")
@@ -362,15 +345,15 @@ def __printFinalMessage(forceTime, counters)   :
 # ---------------------------------
 # Find the first 0-channel block
 # ---------------------------------
-def __findFirstMux0Block(firstBlock,ifp1) :
-  lcData=LCDataBlock()
-  lcData.seekBlock(ifp1,firstBlock)
-  lcData.readBlock(ifp1)
-  i=0
-  while lcData.muxChannel != 0:
-    i+=1
+def __findFirstMux0Block(firstBlock, ifp1) :
+    lcData=LCDataBlock()
+    lcData.seekBlock(ifp1, firstBlock)
     lcData.readBlock(ifp1)
-  return (firstBlock+i)
+    i=0
+    while lcData.muxChannel != 0:
+        i += 1
+        lcData.readBlock(ifp1)
+    return (firstBlock + i)
 
 # ---------------------------------
 def __readLCHeader(ifp1) :
@@ -378,15 +361,17 @@ def __readLCHeader(ifp1) :
   lcHeader.seekHeaderPosition(ifp1)
   lcHeader.readHeader(ifp1)
   firstInpBlock = lcHeader.dataStart
-  return (lcHeader,lcHeader.dataStart)
+  return (lcHeader, lcHeader.dataStart)
 
-# ---------------------------------
-# Create the root of the output file name
-# If the user specified one, use it
-# If not, use the part of the input filename before the first '.'
-# If there are multiple input files, append the data start time to the root
-# ---------------------------------
+
 def __makeOutFileRoot(outfile_path,infname,numInFiles,ifp1,firstBlock) :
+  """
+  Create the root of the output filename
+  
+  If the user specified one, use it
+  If not, use the part of the input filename before the first '.'
+  If there are multiple input files, append the data start time to the root
+  """
   outFileRoot=os.path.join(outfile_path,infname.split('.')[0])
   if numInFiles > 1:
     # Add first time to outfile name
@@ -398,19 +383,16 @@ def __makeOutFileRoot(outfile_path,infname,numInFiles,ifp1,firstBlock) :
     outFileRoot += '_' + timestring
   return outFileRoot
 
-##############################################################################
-# Name      : makeLogger
-# Purpose     : Create a logger instance (allows us to send outputs to a file
-#               and stdout, plus handle debugging, etc
-# Inputs    : -
-# Outputs     : -
-# Bidirectional : -
-# Returns     : -
-# Notes     : -
-##############################################################################
+
 def __makeLogger(fname) :
+  """ Create a logger instance
+  
+  Allows one to send outputs to a file and to stdout, plus handle debugging
+  """
   # First create the file logger
-  logging.basicConfig(filename=fname, level=logging.INFO,format='%(levelname)s %(message)s')
+  logging.basicConfig(filename=fname, filemode='w',
+                      level=logging.INFO,
+                      format='%(levelname)s %(message)s')
   # now the stdout logger
   sth=logging.StreamHandler(sys.stdout)
   sth.setFormatter(logging.Formatter('%(levelname)s %(message)s'))
@@ -418,7 +400,7 @@ def __makeLogger(fname) :
   # now add the stdout handler to the original
   logging.getLogger().addHandler(sth)
   
-##############################################################################
+
 def verify_non_time_header_values(lcData,countUnexpectHdr,printHeader,currBlock):
     if (lcData.blockFlag!=73) | (lcData.numberOfSamples!=166) | (lcData.U1!=3) | (lcData.U2!=166) :
         if (countUnexpectHdr < 100) :
@@ -430,7 +412,6 @@ def verify_non_time_header_values(lcData,countUnexpectHdr,printHeader,currBlock)
     return countUnexpectHdr
 
   
-##############################################################################
 def verify_channel_number(mux_channel,num_channels,previousMuxChannel,warnings,printHeaer,currBlock):
     if previousMuxChannel != -1 :
         predictedChannel=previousMuxChannel+1
@@ -447,19 +428,14 @@ def verify_channel_number(mux_channel,num_channels,previousMuxChannel,warnings,p
                                  (printHeader,currBlock,mux_channel,predictedChannel))
                 warnings+=1
     return mux_channel,warnings
-##############################################################################
-# Name      : processInputFile
-# Purpose     : -
-# Inputs    : -
-# Outputs     : -
-# Bidirectional : -
-# Returns     : -
-# Notes     : Was main() up to version 0.5: main now handles JSON file creation and multiple input files
-##############################################################################
+
+
 def __processInputFile(ifp1, fname, outFileRoot, lcHeader, 
                      firstInpBlock, lastInpBlock, hasHeader, args, 
                      commandQ=None, responseQ=None, debug=False):
-
+    """
+    The workhorse routine
+    """
     # Declare variables
     global startBUG3, printHeader, lcDir, warnings
     i, countErrorTimeBug1, countErrorTimeBug2, countErrorTear, countUnexpectHdr= 0, 0, 0, 0, 0
@@ -707,11 +683,16 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
         previousU1=lcData.U1
         previousU2=lcData.U2
     # END LOOP THROUGH EVERY BLOCK  
+    message = "  {}=>{}: Finished at block {:d} ".format(
+        fname,os.path.split(outfilename)[1],i)
     if args.forceTime:
-            message="  {}=>{}: Finished at block {:d} ({:d} time errors FORCEABLY corrected)".format(fname,outfilename,i,countErrorTear)
+        message += "({:d} time errors FORCEABLY corrected)".format(
+            countErrorTear)
     else:
-            message="  {}=>{}: Finished at block {:d} ({:d} BUG1s, {:d} BUG2s, {:d} Time Tears, {:d} unexpected header values)".format( 
-              fname,outfilename,i, countErrorTimeBug1, countErrorTimeBug2, countErrorTear, countUnexpectHdr)
+        message += "({:d} BUG1s, {:d} BUG2s, ".format( 
+          countErrorTimeBug1, countErrorTimeBug2)
+        message += "{:d} Time Tears, {:d} unexpected header values)".format( 
+          countErrorTear, countUnexpectHdr)
     logging.info(message)
 
     if responseQ:
@@ -839,11 +820,19 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
         ofp_data.close()
     oftt.close()
 
-    if countErrorTear==0:
-        os.remove(fname_timetears);
+    counters=dict(nBug1=countErrorTimeBug1,
+                  nBug2=countErrorTimeBug2,
+                  nTT=countErrorTear,
+                  nWH=countUnexpectHdr)
     
-    counters=dict(nBug1=countErrorTimeBug1,nBug2=countErrorTimeBug2,nTT=countErrorTear,nWH=countUnexpectHdr)
-    return counters, message, outfilename
+    # If there is no tear, remove the timetears file              
+    if countErrorTear==0:
+        os.remove(fname_timetears)
+        return counters, message, outfilename
+    # Otherwise, remove the output data file              
+    else:
+        os.remove(outfilename)
+        return counters, message, fname_timetears
   
 # ----------------------------------------------------------------------------------
 # Check for script invocation (run 'main' if the script is not imported as a module)
