@@ -8,7 +8,8 @@ from __future__ import (absolute_import, division, print_function,
 from future.builtins import *  # NOQA @UnusedWildImport
 
 from . import sdpchain
-from .lcheapo import (LCDataBlock, LCDiskHeader, LCDirEntry)
+# Should actually be .lcheapo, but doesn't work if lcdump.py is called directly
+from lcheapo import (LCDataBlock, LCDiskHeader, LCDirEntry)
 import argparse
 import queue
 import os

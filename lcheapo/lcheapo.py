@@ -158,8 +158,12 @@ class LCDiskHeader (LCCommon):
             struct.unpack('>4H', fp.read(8))
 
         # Python strings do not terminate on '\0', therefore, do this manually.
-        self.softwareVersion = string.split(self.softwareVersion, '\0')[0]
-        self.description = string.split(self.description, '\0')[0]
+        # self.softwareVersion = string.split(self.softwareVersion, '\0')[0]
+        # self.description = string.split(self.description, '\0')[0]
+        self.softwareVersion =\
+            self.softwareVersion.decode("utf-8").split('\0')[0]
+        self.description =\
+            self.description.decode("utf-8").split('\0')[0]
 
         # Additions which cannot be written back out
         self.realSampleRate = self.getRealSampleRate(self.sampleRate)
@@ -364,7 +368,7 @@ class LCDataBlock (LCCommon):
                   "U1:{:03d} U2:{:03d}"
         else:
             fmt = "{:02d}/{:02d}/{:02d}-{:02d}:{:02d}:{:02d}.{:03d}" +\
-                  " F{:03d} CH{:02d} {:4d}samps U1={:03d} U2={:03d}"
+                  " F{:03d} CH{:02d} {:4d} samples U1={:03d} U2={:03d}"
         print(fmt.format(self.year, self.month, self.day, self.hour,
                          self.minute, self.second, self.msec,
                          self.blockFlag, self.muxChannel,
@@ -409,14 +413,14 @@ class LCDataBlock (LCCommon):
         return "{}  {}  {}".format(ch_str, samp_str, date_str)
 
 
-# def main():
-#     "Main Program"
-#     print("lcheapo.py is not a runnable program.")
-#     return 0
-#
-#
-# # --------------------------------------------------------------------------
-# # Run 'main' if the script is not imported as a module)
-# # --------------------------------------------------------------------------
-# if __name__ ==  '__main__':
-#     main()
+def main():
+    "Main Program"
+    print("lcheapo.py is not a runnable program.")
+    return 0
+
+
+# --------------------------------------------------------------------------
+# Run 'main' if the script is not imported as a module)
+# --------------------------------------------------------------------------
+if __name__ ==  '__main__':
+    main()

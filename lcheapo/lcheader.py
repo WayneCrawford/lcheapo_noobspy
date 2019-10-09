@@ -9,6 +9,7 @@ from future.builtins import *  # NOQA @UnusedWildImport
 
 import sys
 import argparse
+# Should actually be .lcheapo, but doesn't work if lcdump.py is called directly
 from .lcheapo import (LCDiskHeader, LCDirEntry)
 # import sdpchain
 from datetime import datetime, timedelta
