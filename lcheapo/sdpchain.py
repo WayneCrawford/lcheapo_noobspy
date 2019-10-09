@@ -1,16 +1,22 @@
-#!/usr/bin/env python2.7
-"sdp-process.py --  SDPCHAIN compatibility functions."
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+SDPCHAIN compatibility functions
+"""
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+from future.builtins import *  # NOQA @UnusedWildImport
 
-from __future__ import print_function
+
 import os
 import json
-import copy         # for deepcopy of argparse dictionary
+# import copy         # for deepcopy of argparse dictionary
 
 
 def setup_paths(args):
     """
     Set up paths according to SDPCHAIN standards
-    
+
     args=class with the following properties:
         mandatory:
             base_directory [str]
@@ -18,9 +24,10 @@ def setup_paths(args):
         optional:
             input_directory [str]
             output_directory [str]
-    """   
+    """
     in_filename_path = _choose_path(args.base_directory, args.input_directory)
-    out_filename_path = _choose_path(args.base_directory, args.output_directory)
+    out_filename_path = _choose_path(args.base_directory,
+                                     args.output_directory)
     if not os.path.exists(out_filename_path):
         print("output directory '{}' does not exist, creating...".format(
             out_filename_path))
@@ -28,21 +35,22 @@ def setup_paths(args):
     elif not os.path.isdir(out_filename_path):
         print("output directory '{}' is a file!, changing to base dir".format(
             out_filename_path))
-        out_filename_path=args.base_directory
-    return in_filename_path,out_filename_path
+        out_filename_path = args.base_directory
+    return in_filename_path, out_filename_path
+
 
 def _choose_path(base_dir, sub_dir):
     """ Sets up absolute path to sub-directory """
     if os.path.isabs(sub_dir):
         return sub_dir
     return os.path.join(base_dir, sub_dir)
-    
+
 
 def make_process_steps_file(app_name, app_description, app_version,
                             exec_cmdline, exec_date, exec_return_code,
                             base_directory,
                             exec_messages=[], exec_parameters={},
-                            exec_tools=[], debug=False) :
+                            exec_tools=[], debug=False):
     """
     Make or append to a process-steps.json file
 
@@ -59,7 +67,7 @@ def make_process_steps_file(app_name, app_description, app_version,
     :param exec_tools: applications called by the main application
     :type  exec_tools: list of strings
     :param exec_parameters: execution parameters
-    :type  exec_parameters: dictionary 
+    :type  exec_parameters: dictionary
     :param exec_messages: messages from execution
     :type  exec_messages: list of strings
     :param exec_return_code: return code of run
@@ -73,31 +81,30 @@ def make_process_steps_file(app_name, app_description, app_version,
     application = dict(name=app_name,
                        description=app_description,
                        version=app_version)
-    execution =  dict(commandline=exec_cmdline,
-                      date=exec_date,
-                      messages=exec_messages,
-                      parameters=exec_parameters,
-                      tools=exec_tools,
-                      return_code=exec_return_code )
-  
-    step = {'application':application,'execution':execution}
+    execution = dict(commandline=exec_cmdline,
+                     date=exec_date,
+                     messages=exec_messages,
+                     parameters=exec_parameters,
+                     tools=exec_tools,
+                     return_code=exec_return_code)
+
+    step = {'application': application, 'execution': execution}
     if debug:
         print(json.dumps(step, indent=4, separators=(',', ': ')))
-    filename=os.path.join(base_directory, 'process-steps.json')
+    filename = os.path.join(base_directory, 'process-steps.json')
     try:
-        fp=open(filename,"r")
-    except:  # File not found
-        tree={"steps":[step]}
+        fp = open(filename, "r")
+    except FileNotFoundError:  # File not found
+        tree = {"steps": [step]}
     else:   # File found
-        tree=json.load(fp)
-        if 'steps' in tree: 
+        tree = json.load(fp)
+        if 'steps' in tree:
             tree['steps'].append(step)
         else:
-            tree['steps']=[step]
-        fp.close() 
+            tree['steps'] = [step]
+        fp.close()
     if debug:
-        json.dumps(tree, indent=4, separators=(',', ': '));  # For testing
-    fp=open(filename,"w")
-    json.dump(tree, fp, sort_keys=True, indent=2);  # For real
+        json.dumps(tree, indent=4, separators=(',', ': '))   # For testing
+    fp = open(filename, "w")
+    json.dump(tree, fp, sort_keys=True, indent=2)   # For real
     fp.close
-
