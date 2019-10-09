@@ -7,7 +7,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 from future.builtins import *  # NOQA @UnusedWildImport
 
-from . import sdpchain
+import sdpchain
 # Should actually be .lcheapo, but doesn't work if lcdump.py is called directly
 from lcheapo import (LCDataBlock, LCDiskHeader, LCDirEntry)
 import argparse
@@ -136,11 +136,11 @@ def main():
     numInFiles = len(args.infiles)
     firstFile = True
     for fname in args.infiles:
-        ifp1 = open(os.path.join(in_filename_path, fname), 'r')
+        ifp1 = open(os.path.join(in_filename_path, fname), 'rb')
 
         # Find and copy the disk header
         if firstFile:    # First file, extract header
-            (lcHeader, firstInpBlock) = __readLCHeader(ifp1)
+            lcHeader, firstInpBlock = __readLCHeader(ifp1)
             if args.verbosity:
                 lcHeader.printHeader()
             # DO NOT TRY TO READ DATA IF FILE IS JUST A HEADER
@@ -151,11 +151,11 @@ def main():
             firstInpBlock = 0      # dataBlocks will start at the beginning
             lcHeader.dirCount = 0  # No header, so no directory entries
 
-        logging.info('='*14 + " PROCESSING FILE {} ".format(fname) + "="*14)
+        logging.info('='*14 + " PROCESSING FILE {} ".format(fname) + "="*13)
 
         # Determine last file block
         ifp1.seek(0, 2)                # Seek end of file
-        lastInpBlock = ifp1.tell() / 512 - 1
+        lastInpBlock = int(ifp1.tell() / 512) - 1
 
         if lastInpBlock <= firstInpBlock + 4:
             print("No data, skipping file")
@@ -334,10 +334,10 @@ def __endBUG3(startBlock, endBlock):
 
 
 def __printFinalMessage(forceTime, counters):
-    logging.info(80*"=")
+    logging.info(97*"=")
     if not forceTime:  # Standard case
         fmt = "Overall totals: {:d} files, {:d} BUG1s, {:d} BUG2s, {:d} " +\
-              "Time tears, {:d} unexpected header values"
+              "Time Tears, {:d} unexpected header values"
         logging.info(fmt.format(counters['iFiles'], counters['iBug1'],
                                 counters['iBug2'], counters['iTT'],
                                 counters['iWH']))
@@ -346,17 +346,23 @@ def __printFinalMessage(forceTime, counters):
         if counters['iBug2'] > 0:
             logging.info("  BUG2= Other isolated errors in time tag")
         if counters['iTT'] > 0:
-            logging.info("  Time Tear=Bad time tag (BUG1 or BUG2) for > 2")
-            logging.info("     consecutive samples.  Could be a stretch of")
-            logging.info("     bad records or a true data gap (MUST CORRECT)")
+            txt = "  Time Tear=Bad time tag (BUG1 or BUG2) for more than " +\
+                  "two consecutive samples.  Could be long"
+            logging.info(txt)
+            txt = "      stretch of bad records or an offset in records " +\
+                  "(must be fixed)"
+            logging.info(txt)
 
     # Make error message (and return code) if there are time tears
         if counters['iTT'] > 0:
-            logging.warning(8*"!!!!!!!!!!")
-            logging.warning("{:d} TIME TEARS,".format(counters['iTT']))
-            logging.warning("  MUST ELIMINATE THEM BEFORE CONTINUING!!!")
-            logging.warning('  Use lcdump to look at suspect sections')
-            logging.warning(8*"!!!!!!!!!!")
+            logging.warning(82*"!")
+            txt = "YOU HAVE {:d} TIME TEARS: YOU MUST ELIMINATE THEM " +\
+                  "BEFORE CONTINUING!!!"
+            logging.warning(txt.format(counters['iTT']))
+            txt = 'Use "lcdump.py OBSfile.*.lch STARTBLOCK NUMBLOCKS" ' +\
+                  'to look at suspect sections'
+            logging.warning(txt)
+            logging.warning(82*"!")
     else:  # Forced time corrections
         logging.warning("FORCED TIME CORRECTIONS, NO EVALUATION OF BUG1/2s")
         txt = "  Overall totals: {:d} files, {:d} forced corrections," +\
@@ -493,7 +499,7 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
     :type  debug: boolean
     :return: counters, message, fname_timetears
     :rtype: `tuple`
-    """
+    """    
     # Declare variables
     global startBUG3, printHeader, lcDir, warnings
     i, countErrorTimeBug1, countErrorTimeBug2 = 0, 0, 0
@@ -513,7 +519,7 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
 
     if not args.dryrun:
         outfilename = outFileRoot + ".fix.lch"
-        ofp1 = open(outfilename, 'w')
+        ofp1 = open(outfilename, 'wb')
     fname_timetears = outFileRoot + '.fix.timetears.txt'
     oftt = open(fname_timetears, 'w')
 
@@ -564,7 +570,7 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
         lcData.readBlock(ifp1)
         if debug and (i > lastInpBlock - 10):
             logging.info("  READ")
-        currBlock = ifp1.tell() / 512 - 1
+        currBlock = int(ifp1.tell() / 512) - 1
         if startBUG3 >= 0 and currBlock > (lastBUG1s[0] + 500):
             __endBUG3(startBUG3, currBlock)
         if i != currBlock:
@@ -574,6 +580,7 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
             logging.info("{:8d}({:d}): ".format(i, ifp1.tell()))
             lcData.prettyPrintHeader()
         # IF THERE IS A USER-CREATED ZERO DATA BLOCK, FILL IN TIME #
+        # REMOVE THIS !!!!
         if (lcData.year == 0 and lcData.month == 0 and lcData.day == 0):
             if inGap_counter == 0:
                 t = lastTime[0] + blockTimeDelta
@@ -748,13 +755,13 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
                                         lcData.changeTime(t)
                                     else:
                                         # Time tear (do not fix it!)
-                                        txt = "{:8d}: Time Tear in Data.  " +\
-                                              "CH{:d} Expected Time:{}, Got:{}"
-                                        logging.warning(
-                                            printHeader +
-                                            txt.format(currBlock,
-                                                       lcData.muxChannel,
-                                                       expectedTime, t))
+                                        fmt = "{:8d}: Time Tear in Data.   " +\
+                                              "CH{:d} Expected Time: {}, " +\
+                                              "Got: {}"
+                                        txt = fmt.format(currBlock,
+                                                         lcData.muxChannel,
+                                                         expectedTime, t)
+                                        logging.warning(printHeader + txt)
                                         warnings += 1
                                         print(printHeader + txt, file=oftt)
                                         countErrorTear += 1
@@ -763,16 +770,15 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
                         # LCHEAPO BUG - A second is dropped (then recovered)
                         if lastBUG1s[0] == currBlock - 500:
                             if startBUG3 < 0:
-                                txt = "{}{:8d}: LCHEAPO BUG #3.  BUG #1s " +\
+                                txt = "{}{:8d}: LCHEAPO BUG #3. BUG #1s " +\
                                       "repeating at 500-block intervals"
                                 logging.info(txt.format(printHeader,
                                                         currBlock))
                                 startBUG3 = currBlock
                                 printHeader = '      '
                         else:
-                            txt = "{}{:8d}: LCHEAPO BUG #1.  CH{:d} " +\
-                                  "Expected Time: {}, Got: {}" +\
-                                  " at 500-block intervals"
+                            txt = "{}{:8d}: LCHEAPO BUG #1. CH{:d} " +\
+                                  "Expected Time: {}, Got: {} "
                             logging.info(
                                 txt.format(printHeader, currBlock,
                                            lcData.muxChannel, expectedTime, t))
@@ -827,10 +833,10 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
 
     # Open the output datafile for reading
     if not args.dryrun:
-        ofp_data = open(outfilename, 'r')  # generally the output file
+        ofp_data = open(outfilename, 'rb')  # generally the output file
     else:
         # if no output file, read block data from input file
-        ofp_data = open(fname, 'r')
+        ofp_data = open(fname, 'rb')
     lcData2 = LCDataBlock()
 
     # Point input and output file ptrs to the directory
@@ -928,10 +934,12 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
     if iDir != lcHeader.dirCount:
         if hasHeader:
             if iDir < lcHeader.dirCount:
-                txt = "\n  DIR{:d}, LAST BLOCK (%d) BEYOND END OF FILE!"
+                txt = "\n  DIR{:d}, LAST BLOCK ({:d}) IS BEYOND THE " +\
+                      "END OF FILE!"
                 logging.info(txt.format(iDir + 1,
                                         lcDir.blockNumber + lcDir.numBlocks))
-                txt = "  REDUCING # OF HDR DIRECTORY ENTRIES FROM {:d} TO {:d}"
+                txt = "  REDUCING NUMBER OF DIRECTORY ENTRIES IN HEADER " +\
+                      "FROM {:d} TO {:d}"
                 logging.info(txt.format(lcHeader.dirCount, iDir))
             else:
                 txt = "\n  ADDED {:d} DIRECTORY ENTRIES TO COVER END OF DATA!"

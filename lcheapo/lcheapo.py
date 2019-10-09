@@ -158,12 +158,8 @@ class LCDiskHeader (LCCommon):
             struct.unpack('>4H', fp.read(8))
 
         # Python strings do not terminate on '\0', therefore, do this manually.
-        # self.softwareVersion = string.split(self.softwareVersion, '\0')[0]
-        # self.description = string.split(self.description, '\0')[0]
-        self.softwareVersion =\
-            self.softwareVersion.decode("utf-8").split('\0')[0]
-        self.description =\
-            self.description.decode("utf-8").split('\0')[0]
+        self.softwareVersion = _str_from_cstr(self.softwareVersion)
+        self.description = _str_from_cstr(self.description)
 
         # Additions which cannot be written back out
         self.realSampleRate = self.getRealSampleRate(self.sampleRate)
@@ -173,7 +169,7 @@ class LCDiskHeader (LCCommon):
                                    "Compressed (16-Bit)",
                                    "Uncompressed (24-Bit)",
                                    "Compressed (24-Bit)")[self.dataType]
-
+    
     def writeHeader(self, fp):
         "Write an LCheapo disk header (packed big endian format)."
         fp.write(struct.pack('>LHLH', self.writeBlock, self.writeByte,
@@ -185,8 +181,9 @@ class LCDiskHeader (LCCommon):
         fp.write(struct.pack('>4L', self.logStart, self.logSize,
                              self.logBlock, self.logByte))
         fp.write(struct.pack('>LH', self.dataStart, self.diskNumber))
-        fp.write(struct.pack('>10s80s', self.softwareVersion,
-                             self.description))
+        fp.write(struct.pack('>10s80s', 
+                             _cstr_from_str(self.softwareVersion),
+                             _cstr_from_str(self.description)))
         fp.write(struct.pack('>3H', self.sampleRate, self.startChannel,
                              self.numberOfChannels))
         fp.write(struct.pack('>3H', self.slowDataRate, self.slowStartChannel,
@@ -368,7 +365,7 @@ class LCDataBlock (LCCommon):
                   "U1:{:03d} U2:{:03d}"
         else:
             fmt = "{:02d}/{:02d}/{:02d}-{:02d}:{:02d}:{:02d}.{:03d}" +\
-                  " F{:03d} CH{:02d} {:4d} samples U1={:03d} U2={:03d}"
+                  "  F{:03d} CH{:02d} {:4d} samps U1={:03d} U2={:03d}"
         print(fmt.format(self.year, self.month, self.day, self.hour,
                          self.minute, self.second, self.msec,
                          self.blockFlag, self.muxChannel,
@@ -411,6 +408,21 @@ class LCDataBlock (LCCommon):
         date_str = date_fmt.format(self.year, self.month, self.day, self.hour,
                                    self.minute, self.second, self.msec)
         return "{}  {}  {}".format(ch_str, samp_str, date_str)
+
+
+def _str_from_cstr(cstr):
+    """
+    Convert a C string to Python
+    """
+    return cstr.decode("utf-8").split('\0')[0]
+
+
+def _cstr_from_str(str):
+    """
+    Convert a Python str to C string
+    """
+    # return str.encode("utf-8") + b'\0' Removed for comparison test
+    return str.encode("utf-8")
 
 
 def main():

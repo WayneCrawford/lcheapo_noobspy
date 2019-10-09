@@ -10,7 +10,7 @@ from future.builtins import *  # NOQA @UnusedWildImport
 import sys
 import argparse
 # Should actually be .lcheapo, but doesn't work if lcdump.py is called directly
-from .lcheapo import (LCDiskHeader, LCDirEntry)
+from lcheapo import (LCDiskHeader, LCDirEntry)
 # import sdpchain
 from datetime import datetime, timedelta
 
@@ -61,7 +61,7 @@ def main(opts):
     h, params = __get_parameters(h, opts.no_questions)
     if opts.dry_run:
         return(2)
-    with open(params['filename_prefix']+'.header.raw.lch', 'w') as fp:
+    with open(params['filename_prefix']+'.header.raw.lch', 'wb') as fp:
         # Pre-blank file
         if opts.noDirectory:
             fp.write(b'\x00' * bytes_per_block * h.dirStart)
@@ -187,7 +187,7 @@ def __generic_header():
     (h.numberOfWindows, h.readByte, h.writeByte) = (0, 0, 0)
 
     # These should be modified after writing directory
-    (h.dirBlock, h.dirCount) = (0, 0)
+    h.dirBlock, h.dirCount = (0, 0)
 
     # USER-SPECIFIED VALUES
     h.description = 'generic lcheapo header'
@@ -217,9 +217,6 @@ def __make_dirEntry(d, blocknum, dt):
     """Put time in lcheapo directory entry"""
     d.blockNumber = blocknum
     d.changeTime(dt)
-    # (d.year,d.month,d.day,d.hour,d.minute,d.second)= dt.timetuple()[0:6]
-    # d.year=d.year-1900
-    # d.msec=int(dt.microsecond/1000)
     return d
 
 
