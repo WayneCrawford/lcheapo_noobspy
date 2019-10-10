@@ -1,9 +1,16 @@
 TO DO
 ======================
  
-- Integrate sdp_process, so that lcfix and lcheader both use it to create process-steps files  
+- Add sdpchain:process-steps to lcheader (update version #)
 
-- Modify sdp-process so that -d ... makes it run the command from within that directory 
+- Add wrappers for commonly used routines:
+  * sdp_dd
+  * sdp_msmod? (
+
+- Modify sdpchain:process so that:
+    * It creates its own part of the command-line arguments (-d, -i, -o)
+    * "-d ... makes it run the command from within that directory " (what
+      does this mean?
 
 Use `reStructuredText
 <http://docutils.sourceforge.net/rst.html>`_ to modify this file.
