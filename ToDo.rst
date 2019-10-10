@@ -1,7 +1,7 @@
 TO DO
 ======================
  
-- Add sdpchain:process-steps to lcheader (update version #)
+- Add sdpchain:process-steps to lcheader (new version #)
 
 - Add wrappers for commonly used routines:
   * sdp_dd
