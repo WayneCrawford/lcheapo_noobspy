@@ -84,6 +84,7 @@ VERSIONS = """
       - Added '-d', '-i' and '-o' options to match SDPCHAIN programs
     0.67:
       - Recognize '*.header.*' files as header+directory, without data
+      - DOESN"T WORK CORRECTLY!! CAT HEADER TO FIRST DATA!!!!
     NOT YET:
       - Force non-time header values
       - Test to make sure first file has header, and subsequent don't
@@ -499,7 +500,7 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
     :type  debug: boolean
     :return: counters, message, fname_timetears
     :rtype: `tuple`
-    """    
+    """
     # Declare variables
     global startBUG3, printHeader, lcDir, warnings
     i, countErrorTimeBug1, countErrorTimeBug2 = 0, 0, 0
@@ -658,10 +659,10 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
                                 lcData.getDateTime())
                             if _to_msec(t - expectedTime) > 0:
                                 fmt = "  {:.1f}s time JUMP after gap! " +\
-                                      "Your data gap is {:d} blocks too SHORT"
+                                      "Your data gap is {:g} blocks too SHORT"
                             else:
                                 fmt = "  {:.1f}s time OVERLAP after gap! " +\
-                                      "Your data gap is {:d} blocks too LONG"
+                                      "Your data gap is {:g} blocks too LONG"
                             txt = fmt.format(diff / 1000.,
                                              lcHeader.numberOfChannels *
                                              diff / blockTime)
@@ -880,7 +881,7 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
                 nextDirBlock = lcDir.blockNumber + lcDir.numBlocks
                 if iDir <= lcHeader.dirSize and nextDirBlock <= lastOutBlock:
                     # ADD DIRECTORY ENTRIES
-                    lcDir.blockNumber = lcDir.blockNumber + lcDir.numBlocks
+                    lcDir.blockNumber += lcDir.numBlocks
                     origDirTime = 'None'
                 else:
                     break
@@ -893,7 +894,7 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
                 origDirTime = 'None'
             else:
                 break
-        verboselogtext = "   {:4d} | {:9d} | {:-26s} |".format(
+        verboselogtext = "   {:4d} | {:9d} | {:26s} |".format(
             iDir + 1, lcDir.blockNumber, origDirTime)
         # Jump out if directory start block number is beyond end of file
         if lcDir.blockNumber > lastOutBlock:
@@ -913,12 +914,11 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
         if verbosity:
             if hasHeader:  # Compare directory times to block times
                 diff = abs(_to_msec(blockTime - lcDir.getDateTime()))
-                logging.info(verboselogtext +
-                             "   {:<26s} | {:14.1f}".format(blockTime,
-                                                            diff/1000))
+                logging.info(verboselogtext + "   {:26s} | {:14.1f}".format(
+                             str(blockTime), diff/1000))
             else:
-                logging.info(verboselogtext +
-                             "   {:<26s} | {:<14s}".format(blockTime, "N/A"))
+                logging.info(verboselogtext + "   {:26s} | {:<14s}".format(
+                             str(blockTime), "N/A"))
         lcDir.changeTime(blockTime)
         # If directory entry goes beyond end of data, write and break out
         if lcDir.blockNumber + lcDir.numBlocks >= lastOutBlock:

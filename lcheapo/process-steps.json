@@ -1,0 +1,50 @@
+{
+  "steps": [
+    {
+      "application": {
+        "description": "Runs a command-line tool and saves information to process-steps.json",
+        "name": "sdp-process",
+        "version": "2.0"
+      },
+      "execution": {
+        "commandline": "[\"/opt/sdpchain/bin/sdp-process\", \"--cmd=dd bs=512 skip=15120 count=496 if=TestOrientationWayne08-11-19.bad.lch of=TestOrientationWayne08-11-19.part6.lch\"]",
+        "date": "2019-11-11T21:55:24",
+        "parameters": {
+          "tool_cmd_line": "dd bs=512 skip=15120 count=496 if=TestOrientationWayne08-11-19.bad.lch of=TestOrientationWayne08-11-19.part6.lch"
+        },
+        "return_code": 256,
+        "tools": [
+          {
+            "command_parameters": "bs=512 skip=15120 count=496 if=TestOrientationWayne08-11-19.bad.lch of=TestOrientationWayne08-11-19.part6.lch",
+            "description": "None",
+            "name": "dd",
+            "version": ""
+          }
+        ]
+      }
+    },
+    {
+      "application": {
+        "description": "Runs a command-line tool and saves information to process-steps.json",
+        "name": "sdp-process",
+        "version": "2.0"
+      },
+      "execution": {
+        "commandline": "[\"/opt/sdpchain/bin/sdp-process\", \"--cmd=dd bs=512 skip=15624 count=6904 if=TestOrientationWayne08-11-19.bad.lch of=TestOrientationWayne08-11-19.part7.lch\"]",
+        "date": "2019-11-11T21:55:42",
+        "parameters": {
+          "tool_cmd_line": "dd bs=512 skip=15624 count=6904 if=TestOrientationWayne08-11-19.bad.lch of=TestOrientationWayne08-11-19.part7.lch"
+        },
+        "return_code": 256,
+        "tools": [
+          {
+            "command_parameters": "bs=512 skip=15624 count=6904 if=TestOrientationWayne08-11-19.bad.lch of=TestOrientationWayne08-11-19.part7.lch",
+            "description": "None",
+            "name": "dd",
+            "version": ""
+          }
+        ]
+      }
+    }
+  ]
+}
