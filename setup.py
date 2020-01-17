@@ -18,8 +18,7 @@ setuptools.setup(
     url="https://github.com/pypa/lcheapo",
     packages=setuptools.find_packages(),
     include_package_data=True,
-    install_requires=[
-      ],
+    install_requires=['future'],
     entry_points={
          'console_scripts': [
              'lcfix=lcheapo.lcfix:main'
