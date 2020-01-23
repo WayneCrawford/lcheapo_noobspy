@@ -433,26 +433,26 @@ def __makeLogger(fname):
     logging.getLogger().addHandler(sth)
 
 
-def verify_non_time_header_values(lcData, countUnexpectHdr, printHeader,
+def verify_non_time_header_values(lcData, n_bad_hdr, printHeader,
                                   currBlock):
     if ((lcData.blockFlag != 73) | (lcData.numberOfSamples != 166) |
             (lcData.U1 != 3) | (lcData.U2 != 166)):
-        if (countUnexpectHdr < 100):
+        if (n_bad_hdr < 100):
             logging.info("{}{:8d}: Unexpected non-time header values:".format(
                 printHeader, currBlock))
             lcData.prettyPrintHeader(True)
-        elif (countUnexpectHdr == 100):
+        elif (n_bad_hdr == 100):
             logging.info("{}{:8d}: >100 Unexpected non-time headers:".format(
                 printHeader, currBlock))
             logging.info("    WON'T PRINT ANY MORE!")
-        countUnexpectHdr += 1
-    return countUnexpectHdr
+        n_bad_hdr += 1
+    return n_bad_hdr
 
 
-def verify_channel_number(mux_channel, num_channels, previousMuxChannel,
+def verify_channel_number(mux_channel, num_channels, prev_mux_chan,
                           warnings, printHeaer, currBlock):
-    if previousMuxChannel != -1:
-        predictedChannel = previousMuxChannel + 1
+    if prev_mux_chan != -1:
+        predictedChannel = prev_mux_chan + 1
         if predictedChannel >= num_channels:
             predictedChannel = 0
         if mux_channel != predictedChannel:
@@ -503,17 +503,17 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
     """
     # Declare variables
     global startBUG3, printHeader, lcDir, warnings
-    i, countErrorTimeBug1, countErrorTimeBug2 = 0, 0, 0
-    countErrorTear, countUnexpectHdr = 0, 0
+    i, n_bug1, n_bug2 = 0, 0, 0
+    n_time_tear, n_bad_hdr = 0, 0
     lastBUG1s = [0, 0, 0, 0]
     printHeader = ''
     startBUG3 = -1
-    inGap_counter = 0
-    previousMuxChannel = -1
-    previousBlockFlag = 73
-    previousNumberOfSamples = 166
-    previousU1 = 3
-    previousU2 = 166
+    n_in_gap = 0
+    prev_mux_chan = -1
+    prev_block_flag = 73
+    prev_num_samps = 166
+    prev_U1 = 3
+    prev_U2 = 166
     verbosity = args.verbosity
     consecIdentTimeErrors, oldDiff = 0, 0
     lcData = LCDataBlock()
@@ -564,7 +564,7 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
     if debug:
         logging.info("  DEBUGGING")
 
-    # For every block, compare expected and actual times.
+    # Loop over blocks, comparing expected and actual times.
     for i in range(firstInpBlock, lastInpBlock+1):
         if debug and (i > lastInpBlock-10):
             logging.info("  BLOCK {:d}".format(i))
@@ -583,51 +583,35 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
         # IF THERE IS A USER-CREATED ZERO DATA BLOCK, FILL IN TIME #
         # REMOVE THIS !!!!
         if (lcData.year == 0 and lcData.month == 0 and lcData.day == 0):
-            if inGap_counter == 0:
-                t = lastTime[0] + blockTimeDelta
-                # bugStartBlock = currBlock
-                bugStartDate = t
-                txt = "{}{:8d}: ZERO-FILLED DATA GAP Starts, filling headers"
-                logging.info(txt.format(printHeader, currBlock))
-            lcData.blockFlag = previousBlockFlag
-            lcData.numberOfSamples = previousNumberOfSamples
-            lcData.U1 = previousU1
-            lcData.U2 = previousU2
-            lcData.muxChannel = previousMuxChannel + 1
-            if (lcData.muxChannel >= lcHeader.numberOfChannels):
-                lcData.muxChannel = 0
-            t = lastTime[lcData.muxChannel] + blockTimeDelta
-            if verbosity:
-                txt = 13*" " + \
-                      "Data Gap: Setting CH{:d} time to {}   Block {:d}"
-                logging.info(txt.format(lcData.muxChannel, t, currBlock))
-            lcData.changeTime(t)
-            bugEndDate = t
-            inGap_counter += 1
+            lcData, t, bugStartDate, bugEndDate, n_in_gap =\
+                _handle_zero_block(lcData, lcHeader, lastTime, blockTimeDelta,
+                                   printHeader, currBlock, prev_block_flag,
+                                   n_in_gap, prev_num_samps, prev_U1, prev_U2,
+                                   prev_mux_chan, verbosity)
         else:
             # VERIFY NON-TIME HEADER VALUES ############
-            countUnexpectHdr =\
-                verify_non_time_header_values(lcData, countUnexpectHdr,
-                                              printHeader, currBlock)
+            n_bad_hdr = verify_non_time_header_values(
+                lcData, n_bad_hdr, printHeader, currBlock)
             # VERIFY CHANNEL NUMBER ############
             lcData.muxChannel, warnings = verify_channel_number(
                 lcData.muxChannel, lcHeader.numberOfChannels,
-                previousMuxChannel, warnings, printHeader, currBlock)
-            if inGap_counter > 0:
+                prev_mux_chan, warnings, printHeader, currBlock)
+            if n_in_gap > 0:
                 # END OF USER-CREATED ZERO DATA BLOCK #############
                 txt = "{}{:8d}: ZERO-FILLED DATA GAP Ends: {:6d} blocks " +\
                     "(~{:.1f}s, from {} to {})"
                 logging.info(txt.format(printHeader, currBlock - 1,
-                             inGap_counter,
-                             (inGap_counter / lcHeader.numberOfChannels) *
+                             n_in_gap,
+                             (n_in_gap / lcHeader.numberOfChannels) *
                                 blockTime / 1000.,
                              bugStartDate, bugEndDate))
-            expectedTime = lastTime[lcData.muxChannel] + blockTimeDelta
+            expect_time = lastTime[lcData.muxChannel] + blockTimeDelta
             t = lcData.getDateTime()
-            diff = abs(_to_msec(t - expectedTime))
+            diff = abs(_to_msec(t - expect_time))
             if diff:
-                if args.forceTime or i > \
-                            lastInpBlock - 3 * lcHeader.numberOfChannels:
+                if args.forceTime or (i > lastInpBlock
+                                      - (3*lcHeader.numberOfChannels)):
+                    # FORCE TIME TO BE WHAT WE EXPECT
                     if (consecIdentTimeErrors > 0) & (diff != oldDiff):
                         # Starting a new time offset
                         logging.info("{:d} blocks".format(
@@ -643,21 +627,22 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
                                                        diff/1000.)
                         if not args.forceTime:
                             forceTimeErrorStr += " BECAUSE NEAR END OF FILE"
-                    t = expectedTime
+                    t = expect_time
                     lcData.changeTime(t)
                     if args.forceTime:
-                        countErrorTear += 1
+                        n_time_tear += 1
                     consecIdentTimeErrors += 1  # Only used for forceTime
                     oldDiff = diff
                 else:
                     if diff > 1100:
-                        # Difference is greater than 1-second.  This could be
-                        # a time tear or another lcheapo bug (bad time entry).
-                        if inGap_counter > 0:
+                        # Difference greater than 1 second, could be a time
+                        # tear or an isolated bad entry (bug #2)
+                        if n_in_gap > 0:
+                            # If in a data gap, just count how long it is
                             logStr = "{}{:8d}:  CH{:d}: TIME={}".format(
                                 printHeader, currBlock, lcData.muxChannel,
                                 lcData.getDateTime())
-                            if _to_msec(t - expectedTime) > 0:
+                            if _to_msec(t - expect_time) > 0:
                                 fmt = "  {:.1f}s time JUMP after gap! " +\
                                       "Your data gap is {:g} blocks too SHORT"
                             else:
@@ -669,7 +654,7 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
                             logging.warning(logStr + printHeader + txt)
                             warnings += 1
                             print(printHeader + txt, file=oftt)
-                            countErrorTear += 1
+                            n_time_tear += 1
                             lastTime[lcData.muxChannel] = lcData.getDateTime()
                             for j in range(lcHeader.numberOfChannels - 1):
                                 # skip one set of channels
@@ -677,95 +662,62 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
                                 lastTime[lcData.muxChannel] =\
                                     lcData.getDateTime()
                         else:
-                            # Find the next block with the same channel
+                            # See if following blocks have the expected time
                             pos = ifp1.tell()
                             channel = lcData.muxChannel
-                            tempData = LCDataBlock()
-                            tempData.readBlock(ifp1)
-                            while channel != tempData.muxChannel:
-                                tempData.readBlock(ifp1)
-                            tempTime = tempData.getDateTime()
-                            tempDiff = abs(_to_msec(tempTime - expectedTime))
-                            ifp1.seek(pos)
-                            # back to the original block
-                            if (tempDiff - 2 * _to_msec(blockTimeDelta) < 2):
-                                # LCHEAPO BUG 2 - Isolated time tag error
-                                txt = "{}{:8d}: LCHEAPO BUG #2.  CH{:d}" +\
-                                      " Expected Time: {}, Got: {}"
-                                logging.info(txt.format(printHeader, currBlock,
-                                             lcData.muxChannel,
-                                             expectedTime, t))
-                                countErrorTimeBug2 += 1
-                                t = expectedTime
+                            nextTime = _get_next_time(ifp1, channel, pos)
+                            tempDiff = abs(_to_msec(nextTime - expect_time))
+                            if (tempDiff - 2*_to_msec(blockTimeDelta) < 2):
+                                _log_error_2("2", printHeader, currBlock,
+                                             lcData.muxChannel, expect_time,
+                                             t)
+                                n_bug2 += 1
+                                t = expect_time
                                 lcData.changeTime(t)
                             else:
                                 # Check TWO blocks ahead with the same channel
-                                tempData = LCDataBlock()
-                                tempData.readBlock(ifp1)
-                                while channel != tempData.muxChannel:
-                                    tempData.readBlock(ifp1)
-                                tempData.readBlock(ifp1)
-                                while channel != tempData.muxChannel:
-                                    tempData.readBlock(ifp1)
-                                tempTime = tempData.getDateTime()
-                                tempDiff = abs(_to_msec(tempTime -
-                                                        expectedTime))
-                                ifp1.seek(pos)
-                                # back to the original block
-
-                                if (tempDiff - 3 * _to_msec(blockTimeDelta)
-                                        < 2):
-                                    # BUG 2B
-                                    txt = "{}{:8d}: LCHEAPO BUG #2b.  " +\
-                                          "CH{:d} Expected Time: {}, Got: {}"
-                                    logging.info(txt.format(printHeader,
-                                                            currBlock,
-                                                            lcData.muxChannel,
-                                                            expectedTime, t))
-                                    countErrorTimeBug2 += 1
-                                    t = expectedTime
+                                nextTime = _get_next_time(ifp1, channel, pos)
+                                tempDiff = abs(_to_msec(nextTime -
+                                                        expect_time))
+                                if (tempDiff - 3*_to_msec(blockTimeDelta) < 2):
+                                    _log_error_2("2b", printHeader, currBlock,
+                                                 lcData.muxChannel,
+                                                 expect_time, t)
+                                    n_bug2 += 1
+                                    t = expect_time
                                     lcData.changeTime(t)
                                 else:
                                     # Check THREE blocks ahead, same channel
-                                    tempData = LCDataBlock()
-                                    tempData.readBlock(ifp1)
-                                    while channel != tempData.muxChannel:
-                                        tempData.readBlock(ifp1)
-                                    tempData.readBlock(ifp1)
-                                    while channel != tempData.muxChannel:
-                                        tempData.readBlock(ifp1)
-                                    tempData.readBlock(ifp1)
-                                    while channel != tempData.muxChannel:
-                                        tempData.readBlock(ifp1)
-                                    tempTime = tempData.getDateTime()
-                                    tempDiff = abs(_to_msec(tempTime -
-                                                            expectedTime))
-                                    ifp1.seek(pos)
-                                    # back to the original block
-                                    if (tempDiff - 4 *
-                                            _to_msec(blockTimeDelta) < 2):
+                                    nextTime = _get_next_time(ifp1, channel,
+                                                              pos)
+                                    tempDiff = abs(_to_msec(nextTime -
+                                                            expect_time))
+                                    if (tempDiff - 4*_to_msec(blockTimeDelta)
+                                            < 2):
                                         # LCHEAPO BUG 2C
-                                        txt = "{}{:8d}: LCHEAPO BUG #2c.  " +\
-                                              "CH{:d} Expected Time:{}, Got:{}"
-                                        logging.info(
-                                            txt.format(printHeader, currBlock,
-                                                       lcData.muxChannel,
-                                                       expectedTime, t))
-                                        countErrorTimeBug2 += 1
-                                        t = expectedTime
+                                        _log_error_2("2c",
+                                                     printHeader,
+                                                     currBlock,
+                                                     lcData.muxChannel,
+                                                     expect_time,
+                                                     t)
+                                        n_bug2 += 1
+                                        t = expect_time
                                         lcData.changeTime(t)
                                     else:
                                         # Time tear (do not fix it!)
-                                        fmt = "{:8d}: Time Tear in Data.   " +\
+                                        fmt = "{:8d}: Time Tear in Data. " +\
                                               "CH{:d} Expected Time: {}, " +\
                                               "Got: {}"
                                         txt = fmt.format(currBlock,
                                                          lcData.muxChannel,
-                                                         expectedTime, t)
+                                                         expect_time, t)
                                         logging.warning(printHeader + txt)
                                         warnings += 1
                                         print(printHeader + txt, file=oftt)
-                                        countErrorTear += 1
+                                        n_time_tear += 1
+                            # Go back to original position
+                            ifp1.seek(pos)
                         # End if diff > 1100:
                     else:
                         # LCHEAPO BUG - A second is dropped (then recovered)
@@ -782,9 +734,9 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
                                   "Expected Time: {}, Got: {} "
                             logging.info(
                                 txt.format(printHeader, currBlock,
-                                           lcData.muxChannel, expectedTime, t))
-                        countErrorTimeBug1 += 1
-                        t = expectedTime
+                                           lcData.muxChannel, expect_time, t))
+                        n_bug1 += 1
+                        t = expect_time
                         lcData.changeTime(t)
                         # FIFO: remove 1st elem & add new last
                         lastBUG1s.pop(0)
@@ -794,7 +746,7 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
                     logging.info(forceTimeErrorStr +
                                  "{:d} blocks".format(consecIdentTimeErrors))
                     consecIdentTimeErrors = 0
-            inGap_counter = 0
+            n_in_gap = 0
         # Write out the block of data and report status (if necessary)
         if not args.dryrun:
             lcData.writeBlock(ofp1)
@@ -802,30 +754,20 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
             if __stopProcess(commandQ):
                 return
             if responseQ:
-                responseQ.put((i, lastInpBlock, countErrorTimeBug1,
-                               countErrorTear))
+                responseQ.put((i, lastInpBlock, n_bug1,
+                               n_time_tear))
 
         lastTime[lcData.muxChannel] = t
-        previousMuxChannel = lcData.muxChannel
-        previousBlockFlag = lcData.blockFlag
-        previousNumberOfSamples = lcData.numberOfSamples
-        previousU1 = lcData.U1
-        previousU2 = lcData.U2
+        prev_mux_chan = lcData.muxChannel
+        prev_block_flag = lcData.blockFlag
+        prev_num_samps = lcData.numberOfSamples
+        prev_U1 = lcData.U1
+        prev_U2 = lcData.U2
     # END LOOP THROUGH EVERY BLOCK
-    message = "  {}=>{}: Finished at block {:d} ".format(
-        fname, os.path.split(outfilename)[1], i)
-    if args.forceTime:
-        message += "({:d} time errors FORCEABLY corrected)".format(
-            countErrorTear)
-    else:
-        message += "({:d} BUG1s, {:d} BUG2s, ".format(
-          countErrorTimeBug1, countErrorTimeBug2)
-        message += "{:d} Time Tears, {:d} unexpected header values)".format(
-          countErrorTear, countUnexpectHdr)
-    logging.info(message)
-
+    message = _print_blockloop_message(fname, outfilename, args.forceTime, i,
+                                       n_time_tear, n_bug1, n_bug2, n_bad_hdr)
     if responseQ:
-        responseQ.put((i, lastInpBlock, countErrorTimeBug1, countErrorTear))
+        responseQ.put((i, lastInpBlock, n_bug1, n_time_tear))
 
     # ----------------------------------------------------------------------
     # Copy over the directory entries and modify the block time to correspond
@@ -869,6 +811,7 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
         lastOutBlock = lastInpBlock + lcHeader.dataStart
     # LCHEAPO DIRECTORY ENTRIES ARE EVERY 14336 blocks BY DEFAULT
     DIRBLOCKS = 14336
+    BAD_DIRBLOCKS = 16384
     # Loop through the directory
     while True:
         # If the input file had a directory, read in the next entry
@@ -877,6 +820,13 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
             if iDir < lcHeader.dirCount:
                 lcDir.readDirEntry(ifp1)
                 origDirTime = lcDir.getDateTime()
+                if not lcDir.numBlocks == DIRBLOCKS:
+                    if lcDir.numBlocks == BAD_DIRBLOCKS:
+                        lcDir.numBlocks = DIRBLOCKS
+                    else:
+                        fmt = "DIR{:10d}: Expected {:d} blocks, found {:d}"
+                        logging.info(fmt.format(iDir, DIRBLOCKS,
+                                                lcDir.numBlocks))
             else:
                 nextDirBlock = lcDir.blockNumber + lcDir.numBlocks
                 if iDir <= lcHeader.dirSize and nextDirBlock <= lastOutBlock:
@@ -961,19 +911,78 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
         ofp_data.close()
     oftt.close()
 
-    counters = dict(nBug1=countErrorTimeBug1,
-                    nBug2=countErrorTimeBug2,
-                    nTT=countErrorTear,
-                    nWH=countUnexpectHdr)
+    counters = dict(nBug1=n_bug1,
+                    nBug2=n_bug2,
+                    nTT=n_time_tear,
+                    nWH=n_bad_hdr)
 
     # If there is no tear, remove the timetears file
-    if countErrorTear == 0:
+    if n_time_tear == 0:
         os.remove(fname_timetears)
         return counters, message, outfilename
     # Otherwise, remove the output data file
     else:
         os.remove(outfilename)
         return counters, message, fname_timetears
+
+
+def _log_error_2(type, printHeader, currBlock, chan, expect_time, t):
+    # LCHEAPO BUG 2 - Isolated time tag error
+    logging.info(
+        "{}{:8d}: LCHEAPO BUG #{}.  CH{:d}  Expected Time: {}, Got: {}".
+        format(printHeader, currBlock, type, chan, expect_time, t))
+
+
+def _print_blockloop_message(fname, outfilename, forceTime, i,
+                             n_time_tear, n_bug1, n_bug2, n_bad_hdr):
+    # Print out end-of-loop message for one file
+    msg = "  {}=>{}: Finished at block {:d} ".format(
+        fname, os.path.split(outfilename)[1], i)
+    if forceTime:
+        msg += f"({n_time_tear:d} time errors FORCEABLY corrected)"
+    else:
+        msg += "({:d} BUG1s, {:d} BUG2s, ".format(n_bug1, n_bug2)
+        msg += "{:d} Time Tears, {:d} unexpected header values)".format(
+          n_time_tear, n_bad_hdr)
+    logging.info(msg)
+    return msg
+
+
+def _get_next_time(ifp1, channel, pos):
+    # Get the time at the next occurence of same channel
+    tempData = LCDataBlock()
+    tempData.readBlock(ifp1)
+    while channel != tempData.muxChannel:
+        tempData.readBlock(ifp1)
+    tempTime = tempData.getDateTime()
+    return tempTime
+
+
+def _handle_zero_block(lcData, lcHeader, lastTime, blockTimeDelta, printHeader,
+                       currBlock, prev_block_flag, n_in_gap, prev_num_samps,
+                       prev_U1, previousU2, prev_mux_chan, verbosity):
+    if n_in_gap == 0:
+        t = lastTime[0] + blockTimeDelta
+        # bugStartBlock = currBlock
+        bugStartDate = t
+        txt = "{}{:8d}: ZERO-FILLED DATA GAP Starts, filling headers"
+        logging.info(txt.format(printHeader, currBlock))
+    lcData.blockFlag = prev_block_flag
+    lcData.numberOfSamples = prev_num_samps
+    lcData.U1 = prev_U1
+    lcData.U2 = previousU2
+    lcData.muxChannel = prev_mux_chan + 1
+    if (lcData.muxChannel >= lcHeader.numberOfChannels):
+        lcData.muxChannel = 0
+    t = lastTime[lcData.muxChannel] + blockTimeDelta
+    if verbosity:
+        txt = 13*" " + \
+              "Data Gap: Setting CH{:d} time to {}   Block {:d}"
+        logging.info(txt.format(lcData.muxChannel, t, currBlock))
+    lcData.changeTime(t)
+    bugEndDate = t
+    n_in_gap += 1
+    return lcData, t, bugStartDate, bugEndDate, n_in_gap
 
 
 # ---------------------------------------------------------------------------
