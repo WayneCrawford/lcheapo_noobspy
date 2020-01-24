@@ -28,4 +28,4 @@ Other subdirectories
 `lcheapo/_examples/`
 ------------------------------------------------------------
 
-Will contain example information files and scripts:
+Should contain example information files and scripts:
