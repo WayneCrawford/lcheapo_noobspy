@@ -2,7 +2,9 @@
 lcheapo
 ===================
 
-Python tools for processing LCHEAPO data files
+Python tools for processing LCHEAPO 2000 data files
+
+All which create or modify data will create/append a process-steps.json file
 
 Overview
 ======================
@@ -10,10 +12,14 @@ Overview
 Command-line programs:
 ----------------------
 
-- lcfix: fix common bugs in an LCHEAPO file
-- lcdump: dump raw information from LCHEAPO files
-- lcheader: create an LCHEAPO header + directory
+:lcfix: fix common bugs in an LCHEAPO file
+:lcdump: dump raw information from LCHEAPO files
+:lcheader: create an LCHEAPO header + directory
+:lccut: extract section of an LCHEAPO file
 
+Modules:
+----------------------
+ - lcheapo: functions accessing different parts of LCHEAPO 2000 files
 
 Other subdirectories
 ======================

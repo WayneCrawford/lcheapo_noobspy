@@ -4,7 +4,7 @@
       "application": {
         "description": "Fix common bugs in LCHEAPO data files", 
         "name": "lcfix", 
-        "version": "0.66"
+        "version": "0.72.0"
       }, 
       "execution": {
         "commandline": "/opt/lcheapo/bin/lcfix BUGGY.raw.lch", 

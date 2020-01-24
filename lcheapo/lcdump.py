@@ -9,9 +9,9 @@ from future.builtins import *  # NOQA @UnusedWildImport
 
 import sys
 import argparse
-# Should actually be .lcheapo, but doesn't work if lcdump.py is called directly
-from lcheapo import (LCDiskHeader, LCDirEntry, LCDataBlock)
 import datetime as dt
+
+from .lcheapo import (LCDiskHeader, LCDirEntry, LCDataBlock)
 
 
 # ------------------------------------
@@ -61,7 +61,7 @@ def main():
     args = getOptions()
 
     fp = open(args.inFilename, 'rb')
-    if args.printHeader | args.format==3 | args.printDirectory:
+    if args.printHeader or args.format==3 or args.printDirectory:
         lcHeader = LCDiskHeader()
         lcHeader.readHeader(fp)
         if args.printHeader:

@@ -36,6 +36,7 @@ class TestLCHEAPOMethods(unittest.TestCase):
 
     def _remove_changeable_processes(self, tree):
         for step in tree["steps"]:
+            step["application"].pop("version", None)
             step["execution"].pop("date", None)
             step["execution"].pop("commandline", None)
             step["execution"]["parameters"].pop("base_directory", None)
@@ -44,16 +45,14 @@ class TestLCHEAPOMethods(unittest.TestCase):
         return tree
 
     def assertTextFilesEqual(self, first, second, msg=None):
-        first_f = open(first)
-        first_str = first_f.read()
-        second_f = open(second)
-        second_str = second_f.read()
-        first_f.close()
-        second_f.close()
+        with open(first) as f:
+            str_a = f.read()
+        with open(second) as f:
+            str_b = f.read()
 
-        if first_str != second_str:
-            first_lines = first_str.splitlines(True)
-            second_lines = second_str.splitlines(True)
+        if str_a != str_b:
+            first_lines = str_a.splitlines(True)
+            second_lines = str_b.splitlines(True)
             delta = difflib.unified_diff(
                 first_lines, second_lines,
                 fromfile=first, tofile=second)
@@ -68,12 +67,13 @@ class TestLCHEAPOMethods(unittest.TestCase):
         """ Compares two binary files """
         self.assertTrue(filecmp.cmp(first, second))
 
-    def test_dump(self):
+    def test_lcdump(self):
         """
         Test lcdump outputs.
         """
         # WRITEOUT OF DATA HEADERS
-        cmd = os.path.join(self.exec_path, 'lcdump.py') + ' ' +\
+        # cmd = os.path.join(self.exec_path, 'lcdump.py') + ' ' +\
+        cmd = 'lcdump' + ' ' +\
             os.path.join(self.testing_path, 'BUGGY.raw.lch') +\
             ' 5000 100  > temp_test.out'
         os.system(cmd)
@@ -87,13 +87,13 @@ class TestLCHEAPOMethods(unittest.TestCase):
 
         # WRITEOUT OF DIRECTORY
 
-    def test_fix_buggy(self):
+    def test_lcfix_buggy(self):
         """
         Test lcfix on a typical (buggy) file
         """
         # Run the code
-        cmd = os.path.join(self.exec_path, 'lcfix.py') + \
-            ' -d ' + self.path + ' -i data BUGGY.raw.lch > temp'
+        # cmd = os.path.join(self.exec_path, 'lcfix.py') + \
+        cmd = f'lcfix -d {self.path} -i data BUGGY.raw.lch > temp'
         os.system(cmd)
         os.remove('temp')
         # print(os.listdir('.'))
@@ -127,13 +127,12 @@ class TestLCHEAPOMethods(unittest.TestCase):
             os.path.join(self.testing_path, new_outfname))
         os.remove(new_outfname)
 
-    def test_fix_bad(self):
+    def test_lcfix_bad(self):
         """
         Test lcfix on a bad (full of time tears) file
         """
         # Run the code
-        cmd = os.path.join(self.exec_path, 'lcfix.py') + \
-            ' -d ' + self.path + ' -i data BAD.bad.lch > temp'
+        cmd = f'lcfix -d {self.path} -i data BAD.bad.lch > temp'
         os.system(cmd)
         os.remove('temp')
 
@@ -166,7 +165,25 @@ class TestLCHEAPOMethods(unittest.TestCase):
             os.path.join(self.testing_path, new_outfname))
         os.remove(new_outfname)
 
-    def test_header(self):
+    def test_lccut(self):
+        """
+        Test lccut
+        """
+        # Run the code
+        cmd = f'lccut -d {self.path} -i data BUGGY.fix.lch --start 5000 --end 5099 > temp'
+        os.system(cmd)
+        os.remove('temp')
+        os.remove('process-steps.json')
+
+        # Compare binary files (fix.timetears.txt)
+        outfname = 'BUGGY.fix_5000_5099.lch'
+        assert os.path.exists(outfname)
+        self.assertBinFilesEqual(
+            outfname,
+            os.path.join(self.testing_path, outfname))
+        os.remove(outfname)
+
+    def test_lcheader(self):
         """
         Test lcheader
         """

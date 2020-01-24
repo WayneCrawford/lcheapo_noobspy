@@ -3,44 +3,88 @@
 """
 Cut an LCHEAPO file into pieces
 
-Used to remove bad/empty blocks
+Used to remove bad/empty blocks, blocks start with 0 and are 512-bytes
 """
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 from future.builtins import *  # NOQA @UnusedWildImport
 
-import sdpchain
-from lcheapo import (LCDataBlock, LCDiskHeader, LCDirEntry)
 import argparse
-import queue
 import os
-import textwrap
-import copy         # for deepcopy of argparse dictionary
-import logging      # for logging information
-import datetime
+from datetime import datetime as dt
 import sys
+from math import floor
+
+from . import sdpchain
+# from .lcheapo import (LCDataBlock, LCDiskHeader, LCDirEntry)
+
+BLOCK_SIZE = 512
+MAX_BLOCK_READ = 2048   # max number of blocks to read at once
+
 
 def main():
-
-    global warnings
-    # Prepare variables
+    start_time_str = dt.strftime(dt.utcnow(), '%Y-%m-%dT%H:%M:%S')
+    version = {}
+    with open(os.path.join(os.path.dirname(__file__), "version.py")) as fp:
+        exec(fp.read(), version)
+    return_code = 0
+    exec_messages = []
 
     # GET ARGUMENTS
     args = getOptions()
-    
-    for filename in args.infiles:
-        with fp.open(filename) as fp:
-            _print_Info(fp)
+
+    with open(os.path.join(args.in_dir, args.in_fname), 'rb') as fp:
+        # Set/validate last block to read
+        fp.seek(0,2)   # End of file
+        last_file_block = floor(fp.tell()/BLOCK_SIZE)-1
+        if args.end:
+            if args.end > last_file_block:
+                args.end = last_file_block
+        else:
+            args.end = last_file_block
+        # Quit if start block is after EOF and/or end block
+        if args.start > last_file_block:
+            return_code = 2
+            msg = 'Error: --start block [{:d}] is beyond EOF [{:d}]'.format(
+                args.start, last_file_block)
+            print(msg)
+            exec_messages.append(msg)
+        elif args.start > args.end:
+            return_code = 3
+            msg = 'Error: --start block [{:d}] is beyond --end [{:d}]'.format(
+                args.start, args.end)
+            print(msg)
+            exec_messages.append(msg)
+        else:
+            if not args.out_fname:
+                # Create output filename
+                base, ext = os.path.splitext(args.in_fname)
+                args.out_fname = f'{base}_{args.start:d}_{args.end:d}{ext}'
+            msg = 'Writing blocks {:d}-{:d} to {}'.format(
+                args.start, args.end, args.out_fname)
+            print(msg)
+            exec_messages.append(msg)
+            with open(os.path.join(args.out_dir, args.out_fname), 'wb') as of:
+                start_block = args.start
+                fp.seek(start_block*BLOCK_SIZE,0) 
+                while start_block <= args.end:
+                    if (args.end-start_block+1) < MAX_BLOCK_READ:  # NEAR EOF
+                        of.write(fp.read((args.end-start_block+1) * BLOCK_SIZE))
+                        break
+                    else:
+                        of.write(fp.read(MAX_BLOCK_READ * BLOCK_SIZE))
+                        start_block += MAX_BLOCK_READ
+    # Save/append process information to process_steps file
     sdpchain.make_process_steps_file(
         'lccut',
-        'Cut an LCHEAPO file into pieces',
-        versionString,
+        __doc__,
+        version['__version__'],
         " ".join(sys.argv),
-        startTimeStr,
-        returnCode,
-        args.base_directory,
-        exec_messages=msgs,
-        exec_parameters=parameters)
+        start_time_str,
+        return_code,
+        args.base_dir,
+        exec_messages=exec_messages,
+        exec_parameters='')
 
 
 def getOptions():
@@ -50,14 +94,31 @@ def getOptions():
     parser = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("infiles", metavar="inFileName", nargs='+',
-                        help="Input filename(s)")
+    parser.add_argument("in_fname", help="Input filename")
+    parser.add_argument("--of", dest="out_fname", default="",
+                        help="""
+                        Output filename.  If not provided, writes to
+                        {root}_{start}_{end}.{ext}, where {ext} is the last
+                        pathname component of {in_file_name} and {root} is
+                        the rest""")
+    parser.add_argument("--start", type=int, default=0,
+                        help="start block to write out (0 if not specified)")
+    parser.add_argument("--end", type=int, default=0,
+                        help=""" last block to write out (end of file if not
+                        specified)""")
+    parser.add_argument("-d", "--directory", dest="base_dir",
+                        default='.', help="Base directory for files")
+    parser.add_argument("-i", "--input", dest="in_dir", default='.',
+                        help="path to input files (abs, or rel to base)")
+    parser.add_argument("-o", "--output", dest="out_dir", default='.',
+                        help="path for output files (abs, or rel to base)")
     args = parser.parse_args()
+
+    if not os.path.isabs(args.in_dir):
+        args.in_dir = os.path.join(args.base_dir, args.in_dir)
+    if not os.path.isabs(args.out_dir):
+        args.out_dir = os.path.join(args.base_dir, args.out_dir)
     return args
-
-
-
-
 
 
 if __name__ == '__main__':

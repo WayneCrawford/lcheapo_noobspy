@@ -10,7 +10,7 @@ with open("lcheapo/version.py") as fp:
 setuptools.setup(
     name="lcheapo",
     version=version['__version__'],
-    author="Wayne Crawford",
+    author="Wayne Crawford (original code by Paul Georgief at UCSD-SIO)",
     author_email="crawford@ipgp.fr",
     description="LCHEAPO data operations",
     long_description=long_description,
@@ -21,8 +21,9 @@ setuptools.setup(
     install_requires=['future'],
     entry_points={
          'console_scripts': [
-             'lcfix=lcheapo.lcfix:main'
-             'lcdump=lcheapo.lcdump:main'
+             'lcfix=lcheapo.lcfix:main',
+             'lcdump=lcheapo.lcdump:main',
+             'lccut=lcheapo.lccut:main',
              'lcheader=lcheapo.lcheader:main'
          ]
     },
