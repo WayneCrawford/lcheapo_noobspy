@@ -19,7 +19,8 @@ Command-line programs:
 
 Modules:
 ----------------------
- - lcheapo: functions accessing different parts of LCHEAPO 2000 files
+
+ :lcheapo: functions accessing different parts of LCHEAPO 2000 files
 
 Other subdirectories
 ======================
@@ -27,7 +28,4 @@ Other subdirectories
 `lcheapo/_examples/`
 ------------------------------------------------------------
 
-Contains example information files and scripts:
-
-Use `reStructuredText
-<http://docutils.sourceforge.net/rst.html>`_ to modify this file.
+Will contains example information files and scripts:
