@@ -2,27 +2,31 @@
   "steps": [
     {
       "application": {
-        "description": "Fix common bugs in LCHEAPO data files", 
-        "name": "lcfix", 
-        "version": "0.72.0"
-      }, 
+        "description": "Fix common bugs in LCHEAPO data files",
+        "name": "lcfix",
+        "version": "0.72.1.2"
+      },
       "execution": {
-        "commandline": "/opt/lcheapo/bin/lcfix BUGGY.raw.lch", 
+        "commandline": "/Users/crawford/anaconda3/envs/lcheapo/bin/lcfix -d /Users/crawford/_Work/Programming/lcheapo/lcheapo/tests -i data BUGGY.raw.lch",
+        "date": "2020-01-27T11:42:40",
         "messages": [
-          "  BUGGY.raw.lch=>BUGGY.fix.lch: Finished at block 9999 (52 BUG1s, 0 BUG2s, 0 Time Tears, 0 unexpected header values)"
-        ], 
+          "  BUGGY.raw.lch=>BUGGY.fix.lch: Finished at block 9999 (52 BUG1s, 0 BUG2s, 0 BUG3s, 0 Time Tears, 0 unexpected header values)"
+        ],
         "parameters": {
-          "dryrun": false, 
-          "forceTime": false, 
+          "base_directory": "/Users/crawford/_Work/Programming/lcheapo/lcheapo/tests",
+          "dryrun": false,
+          "forceTime": false,
+          "input_directory": "data",
           "input_files": [
             "BUGGY.raw.lch"
-          ], 
+          ],
+          "output_directory": ".",
           "output_files": [
             "BUGGY.fix.lch"
-          ], 
+          ],
           "verbosity": 0
-        }, 
-        "return_code": 0, 
+        },
+        "return_code": 0,
         "tools": []
       }
     }

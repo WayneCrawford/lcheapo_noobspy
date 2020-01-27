@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Fix errors in lcheapo files
+Fix errors and signal time tears in lcheapo files:
+  1: Isolated one second time tag offsets.
+  2: Isolated bad time tags
+  3: Bad n_blocks in directory entry (says 16384 but is 14336)
 """
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
@@ -33,7 +36,8 @@ def main():
 
     global warnings
     # Prepare variables
-    counters = dict(iBug1=0, iBug2=0, iTT=0, iWH=0, iFiles=0)
+    counters = {'iBug1': 0, 'iBug2': 0, 'iBug3': 0,
+                'iTT': 0, 'iWH': 0, 'iFiles': 0}
     msgs = []
     outFiles = []
     # lcData = LCDataBlock()
@@ -113,6 +117,7 @@ def main():
         # Update counters
         counters['iBug1'] += loopcounters['nBug1']
         counters['iBug2'] += loopcounters['nBug2']
+        counters['iBug3'] += loopcounters['nBug3']
         counters['iTT'] += loopcounters['nTT']
         counters['iWH'] += loopcounters['nWH']
         counters['iFiles'] += 1
@@ -153,35 +158,23 @@ def getOptions():
     Parse user passed options and parameters.
     """
     epi_text = textwrap.dedent("""\
-    =========================================================================
-    The LCHEAPO bugs are:\n\
-        1: A second is dropped then picked up on the next block.
-        2: Time tag is wrong for up to 3 consecutive blocks
-
     Outputs (for input filename root.*):
-        root.fix.lch: fixed data
-        root.fix.txt: information about fixes applied
-        root.fix.timetears.txt: time tear lines (if any)
+      - root.fix.lch: fixed data
+      - root.fix.txt: text on bugs found and fixes applied
+      - (root.fix.timetears.txt): list of time tears
     Notes:
-        - TIME TEARS MUST BE ELIMINATED BEFORE FURTHER PROCESSING!!!
-        - Sometimes (if there were 3+ consecutive bad times/channel, but not
-          an overall time tear), rerunning this program on the
-          output will get rid of leftover "time tears"
-        - The last data block is always ignored, because this block sometimes
-          causes problems
+      - TIME TEARS MUST BE ELIMINATED BEFORE FURTHER PROCESSING!!!
     Recommendations:
-        - Name your inputfile STA.lch, where STA is the station name
-        - After running, and once all time tears have been hand-corrected,
-          re-run %prog -v --dryrun on the fixed file to verify
-          that there are no remaining errors and to get information
-          about the directory header.
+      - Name your inputfile STA.raw.lch, where STA is the station name
+      - Run "%(prog)s -v --dryrun" on the fixed file to verify that no errors
+        remain.
     Example:
-        - for an LCHEAPO file named RR38.lch:
-          > lcFix.py RR38.raw.lch
-          > lcFix.py -v --dryrun RR38.fix.lch > RR38-verify.txt
+      - for an LCHEAPO file named RR38.lch:
+        > %(prog)s RR38.raw.lch
+        > %(prog)s -v --dryrun RR38.fix.lch
     """)
     parser = argparse.ArgumentParser(
-        description="Fix common LCHEAPO bugs",
+        description=__doc__,
         epilog=epi_text,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("infiles", metavar="inFileName", nargs='+',
@@ -190,16 +183,24 @@ def getOptions():
                         version='%(prog)s {:s}'.format(version['__version__']))
     parser.add_argument("-v", "--verbose", dest="verbosity", default=0,
                         action="count",
-                        help="Be verbose (-v = kind of, -vv = very)")
+                        help="be verbose (-v = kind of, -vv = very)")
     parser.add_argument("--dryrun", dest="dryrun", default=False,
                         action="store_true",
-                        help="Dry Run: do not output fixed LCHEAPO file")
-    parser.add_argument("-d", "--directory", dest="base_directory",
-                        default='.', help="Base directory for files")
-    parser.add_argument("-i", "--input", dest="input_directory", default='.',
-                        help="path to input files (abs, or rel to base)")
-    parser.add_argument("-o", "--output", dest="output_directory", default='.',
-                        help="path for output files (abs, or rel to base)")
+                        help="do not output fixed LCHEAPO file")
+    parser.add_argument("-d", dest="base_directory", metavar="BASE_DIR",
+                        default='.', help="base directory for files")
+    parser.add_argument("-i", dest="input_directory", metavar="IN_DIR",
+                        default='.', help="input file directory (absolute, " +
+                                          "or relative to base_dir)")
+    parser.add_argument("-o", dest="output_directory", metavar="OUT_DIR",
+                        default='.', help="output file directory (absolute, " +
+                                          "or relative to base_dir)")
+#     parser.add_argument("-d", "--directory", dest="base_dir",
+#                         default='.', help="Base directory for files")
+#     parser.add_argument("-i", "--input", dest="in_dir", default='.',
+#                         help="path to input files (abs, or rel to base)")
+#     parser.add_argument("-o", "--output", dest="out_dir", default='.',
+#                         help="path for output files (abs, or rel to base)")
     parser.add_argument("-F", "--forceTimes", dest="forceTime", default=False,
                         action="store_true",
                         help="Force timetags to be consecutive")
@@ -269,15 +270,17 @@ def __endBUG3(startBlock, endBlock):
 def __printFinalMessage(forceTime, counters):
     logging.info(97*"=")
     if not forceTime:  # Standard case
-        fmt = "Overall totals: {:d} files, {:d} BUG1s, {:d} BUG2s, {:d} " +\
-              "Time Tears, {:d} unexpected header values"
+        fmt = "Overall: {:d} files, {:d} BUG1s, {:d} BUG2s, {:d} BUG3s," +\
+              " {:d} Time Tears, {:d} unexpected header values"
         logging.info(fmt.format(counters['iFiles'], counters['iBug1'],
-                                counters['iBug2'], counters['iTT'],
-                                counters['iWH']))
+                                counters['iBug2'], counters['iBug3'],
+                                counters['iTT'], counters['iWH']))
         if counters['iBug1'] > 0:
             logging.info("  BUG1= 1-second errors in time tag")
         if counters['iBug2'] > 0:
             logging.info("  BUG2= Other isolated errors in time tag")
+        if counters['iBug3'] > 0:
+            logging.info("  BUG3= Incorrect entry length in directory")
         if counters['iTT'] > 0:
             txt = "  Time Tear=Bad time tag (BUG1 or BUG2) for more than " +\
                   "two consecutive samples.  Could be long"
@@ -435,7 +438,7 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
     """
     # Declare variables
     global startBUG3, printHeader, lcDir, warnings
-    i, n_bug1, n_bug2 = 0, 0, 0
+    i, n_bug1, n_bug2, n_bug3 = 0, 0, 0, 0
     n_time_tear, n_bad_hdr = 0, 0
     lastBUG1s = [0, 0, 0, 0]
     printHeader = ''
@@ -686,8 +689,7 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
             if __stopProcess(commandQ):
                 return
             if responseQ:
-                responseQ.put((i, lastInpBlock, n_bug1,
-                               n_time_tear))
+                responseQ.put((i, lastInpBlock, n_bug1, n_time_tear))
 
         lastTime[lcData.muxChannel] = t
         prev_mux_chan = lcData.muxChannel
@@ -696,8 +698,6 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
         prev_U1 = lcData.U1
         prev_U2 = lcData.U2
     # END LOOP THROUGH EVERY BLOCK
-    message = _print_blockloop_message(fname, outfilename, args.forceTime, i,
-                                       n_time_tear, n_bug1, n_bug2, n_bad_hdr)
     if responseQ:
         responseQ.put((i, lastInpBlock, n_bug1, n_time_tear))
 
@@ -755,6 +755,7 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
                 if not lcDir.numBlocks == DIRBLOCKS:
                     if lcDir.numBlocks == BAD_DIRBLOCKS:
                         lcDir.numBlocks = DIRBLOCKS
+                        n_bug3 += 1
                     else:
                         fmt = "DIR{:10d}: Expected {:d} blocks, found {:d}"
                         logging.info(fmt.format(iDir, DIRBLOCKS,
@@ -813,6 +814,12 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
             lcDir.writeDirEntry(ofp1)
         iDir += 1
 
+    counters = {'nBug1': n_bug1, 'nBug2': n_bug2, 'nBug3': n_bug3,
+                'nTT': n_time_tear, 'nWH': n_bad_hdr}
+
+    message = _print_blockloop_message(fname, outfilename, args.forceTime, i,
+                                       n_time_tear, n_bug1, n_bug2, n_bug3,
+                                       n_bad_hdr)
     if iDir != lcHeader.dirCount:
         if hasHeader:
             if iDir < lcHeader.dirCount:
@@ -843,11 +850,6 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
         ofp_data.close()
     oftt.close()
 
-    counters = dict(nBug1=n_bug1,
-                    nBug2=n_bug2,
-                    nTT=n_time_tear,
-                    nWH=n_bad_hdr)
-
     # If there is no tear, remove the timetears file
     if n_time_tear == 0:
         os.remove(fname_timetears)
@@ -866,14 +868,16 @@ def _log_error_2(type, printHeader, currBlock, chan, expect_time, t):
 
 
 def _print_blockloop_message(fname, outfilename, forceTime, i,
-                             n_time_tear, n_bug1, n_bug2, n_bad_hdr):
+                             n_time_tear, n_bug1, n_bug2, n_bug3,
+                             n_bad_hdr):
     # Print out end-of-loop message for one file
     msg = "  {}=>{}: Finished at block {:d} ".format(
         fname, os.path.split(outfilename)[1], i)
     if forceTime:
         msg += f"({n_time_tear:d} time errors FORCEABLY corrected)"
     else:
-        msg += "({:d} BUG1s, {:d} BUG2s, ".format(n_bug1, n_bug2)
+        msg += "({:d} BUG1s, {:d} BUG2s, {:d} BUG3s, ".format(
+            n_bug1, n_bug2, n_bug3)
         msg += "{:d} Time Tears, {:d} unexpected header values)".format(
           n_time_tear, n_bad_hdr)
     logging.info(msg)

@@ -2,31 +2,31 @@
   "steps": [
     {
       "application": {
-        "description": "Fix common bugs in LCHEAPO data files", 
-        "name": "lcfix", 
-        "version": "0.72.0"
-      }, 
+        "description": "Fix common bugs in LCHEAPO data files",
+        "name": "lcfix",
+        "version": "0.72.1.2"
+      },
       "execution": {
-        "commandline": "/opt/lcheapo/bin/lcfix --forceTimes BAD.bad.lch", 
-        "date": "2019-10-04T13:01:14", 
+        "commandline": "/Users/crawford/anaconda3/envs/lcheapo/bin/lcfix -d /Users/crawford/_Work/Programming/lcheapo/lcheapo/tests -i data BAD.bad.lch",
+        "date": "2020-01-27T11:42:40",
         "messages": [
-          "  BAD.bad.lch=>BAD.fix.lch: Finished at block 9999 (0 BUG1s, 0 BUG2s, 48 Time Tears, 0 unexpected header values)"
-        ], 
+          "  BAD.bad.lch=>BAD.fix.lch: Finished at block 9999 (0 BUG1s, 0 BUG2s, 0 BUG3s, 48 Time Tears, 0 unexpected header values)"
+        ],
         "parameters": {
-          "base_directory": ".", 
-          "dryrun": false, 
-          "forceTime": false, 
-          "input_directory": ".", 
+          "base_directory": "/Users/crawford/_Work/Programming/lcheapo/lcheapo/tests",
+          "dryrun": false,
+          "forceTime": false,
+          "input_directory": "data",
           "input_files": [
             "BAD.bad.lch"
-          ], 
-          "output_directory": ".", 
+          ],
+          "output_directory": ".",
           "output_files": [
             "BAD.fix.timetears.txt"
-          ], 
+          ],
           "verbosity": 0
-        }, 
-        "return_code": -1, 
+        },
+        "return_code": -1,
         "tools": []
       }
     }

@@ -15,15 +15,18 @@ import json
 
 def setup_paths(args):
     """
-    Set up paths according to SDPCHAIN standards
+    Set up paths using SDPCHAIN standards
 
-    args=class with the following properties:
-        mandatory:
-            base_directory [str]
-            infiles [list]
-        optional:
-            input_directory [str]
-            output_directory [str]
+    :parm args: argparse namespace with the following fields
+                 - base_dir: base directory
+                 - infiles: list of input files
+                 - in_dir: directory containing input files
+                 - out_dir directory containing output files
+                infiles is a list, the rest are strings
+                the process-steps file will be opened or appended in base_dir
+                in_dir and out_dir are absolute paths, or relative to base_dir
+    :return in_path, out_path: path for input and output files
+    :rtype: tuple
     """
     in_filename_path = _choose_path(args.base_directory, args.input_directory)
     out_filename_path = _choose_path(args.base_directory,

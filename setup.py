@@ -15,7 +15,7 @@ setuptools.setup(
     description="LCHEAPO data operations",
     long_description=long_description,
     long_description_content_type="text/x-rst; charset=UTF-8",
-    url="https://github.com/pypa/lcheapo",
+    url="https://github.com/WayneCrawford/lcheapo",
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=['future'],
