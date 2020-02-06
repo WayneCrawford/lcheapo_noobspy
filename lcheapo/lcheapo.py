@@ -10,7 +10,7 @@ from future.builtins import *  # NOQA @UnusedWildImport
 import sys
 import datetime
 import struct
-import string
+# import string
 import os
 
 # ------------------------------------
@@ -23,6 +23,9 @@ BLOCK_SIZE = 512
 
 
 class LCCommon:
+    """
+    LCHEAPO Parent Class
+    """
     def __init__(self):
         (self.msec, self.second, self.minute, self.hour,
          self.day, self.month, self.year) = (0, 0, 0, 0, 1, 1, 2000)
@@ -97,7 +100,7 @@ class LCCommon:
 
 class LCUserData (LCCommon):
     """
-    Read/Write the user data section of a LCheapo file
+    LCheapo user data section class
     """
     def __init__(self):
         self.userData = ""
@@ -123,7 +126,9 @@ class LCUserData (LCCommon):
 
 
 class LCDiskHeader (LCCommon):
-    "Read/Write values of an LCheapo disk header."
+    """
+    LCheapo disk header class
+    """
     def __init__(self):
         pass
 
@@ -169,7 +174,7 @@ class LCDiskHeader (LCCommon):
                                    "Compressed (16-Bit)",
                                    "Uncompressed (24-Bit)",
                                    "Compressed (24-Bit)")[self.dataType]
-    
+
     def writeHeader(self, fp):
         "Write an LCheapo disk header (packed big endian format)."
         fp.write(struct.pack('>LHLH', self.writeBlock, self.writeByte,
@@ -181,7 +186,7 @@ class LCDiskHeader (LCCommon):
         fp.write(struct.pack('>4L', self.logStart, self.logSize,
                              self.logBlock, self.logByte))
         fp.write(struct.pack('>LH', self.dataStart, self.diskNumber))
-        fp.write(struct.pack('>10s80s', 
+        fp.write(struct.pack('>10s80s',
                              _cstr_from_str(self.softwareVersion),
                              _cstr_from_str(self.description)))
         fp.write(struct.pack('>3H', self.sampleRate, self.startChannel,
@@ -258,7 +263,7 @@ class LCDiskHeader (LCCommon):
 
 class LCDirEntry (LCCommon):
     """
-    Read/Write a single directory entry from an LCheapo file.
+    LCheapo Directory single-entry class
     """
     def __init__(self):
         pass
@@ -307,7 +312,7 @@ class LCDirEntry (LCCommon):
 
 
 class LCDataBlock (LCCommon):
-    "Read/Write a data block in the LCheapo file."
+    "LCheapo data block class"
     def __init__(self):
         pass
 
@@ -431,8 +436,6 @@ def main():
     return 0
 
 
-# --------------------------------------------------------------------------
 # Run 'main' if the script is not imported as a module)
-# --------------------------------------------------------------------------
-if __name__ ==  '__main__':
+if __name__ == '__main__':
     main()

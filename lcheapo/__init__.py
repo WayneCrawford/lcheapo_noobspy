@@ -1,6 +1,2 @@
 name = "lcheapo"
-# import .lcfix
-# import .lcheader
-# import .lcheapo
-# import .lcdump
-# import .sdpchain
+from .lcheapo import (LCDataBlock, LCDiskHeader, LCDirEntry)

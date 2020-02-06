@@ -3,44 +3,50 @@
 """
 Return basic information about LCHEAPO files
 
-By default, returns number of channels, samp_rate and start and end of each file
+By default, returns number of channels, samp_rate and start
+and end of each file
 """
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 from future.builtins import *  # NOQA @UnusedWildImport
 
-import sdpchain
-from lcheapo import (LCDataBlock, LCDiskHeader, LCDirEntry)
+from . import sdpchain
+from lcheapo import (LCDataBlock, LCDiskHeader)
 import argparse
-import queue
 import os
-import textwrap
-import copy         # for deepcopy of argparse dictionary
-import logging      # for logging information
 import datetime
 import sys
 
-def main():
+version = {}
+with open(os.path.join(os.path.dirname(__file__), "version.py")) as fp:
+    exec(fp.read(), version)
 
+
+def main():
     global warnings
     # Prepare variables
+    startTimeStr = datetime.datetime.strftime(
+        datetime.datetime.utcnow(), '%Y-%m-%dT%H:%M:%S')
+    returnCode = 0
 
     # GET ARGUMENTS
     args = getOptions()
-    
+    in_filename_path, out_filename_path = sdpchain.setup_paths(args)
+
     for filename in args.infiles:
-        with fp.open(filename) as fp:
+        with open(os.path.join(in_filename_path, filename),
+                  'rb') as fp:
             _print_Info(fp)
     sdpchain.make_process_steps_file(
         'lcinfo',
         'Return basic information about LCHEAPO files',
-        versionString,
+        version['__version__'],
         " ".join(sys.argv),
         startTimeStr,
         returnCode,
         args.base_directory,
-        exec_messages=msgs,
-        exec_parameters=parameters)
+        exec_messages='',
+        exec_parameters='')
 
 
 def getOptions():
@@ -52,43 +58,51 @@ def getOptions():
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("infiles", metavar="inFileName", nargs='+',
                         help="Input filename(s)")
+    parser.add_argument("-d", dest="base_directory", metavar="BASE_DIR",
+                        default='.', help="base directory for files")
+    parser.add_argument("-i", dest="input_directory", metavar="IN_DIR",
+                        default='.', help="input file directory (absolute, " +
+                                          "or relative to base_dir)")
+    parser.add_argument("-o", dest="output_directory", metavar="IN_DIR",
+                        default='.', help="unused")
     args = parser.parse_args()
     return args
 
 
-def getTimeDelta(seconds=0.):
+def _get_times(fp, block_num, samp_rate):
     """
-    Convert seconds to a timedelta() object
-
-    :param seconds: the number of seconds
-    :type  seconds: float
-    :return: timedelta
-    :rtype:  class datetime.timedelta
+    Get start and end time of the given block
     """
-    days = int(seconds / 86400)
-    seconds -= days * 86400
-    hours = int(seconds / 3600)
-    seconds -= hours * 3600
-    minutes = int(seconds/60)
-    seconds -= minutes * 60
-    int_secs = int(seconds)
-    seconds -= int_secs
-    msec = int(seconds * 1000)
-    return datetime.timedelta(days=days, hours=hours, minutes=minutes,
-                              seconds=seconds, milliseconds=msec)
+    lcData = LCDataBlock()
+    lcData.seekBlock(fp, block_num)
+    lcData.readBlock(fp)
+    first_time = lcData.getDateTime()
+    last_time = first_time + datetime.timedelta(
+        seconds=lcData.numberOfSamples / samp_rate)
+    return first_time, last_time
 
 
-def _to_msec(tm):
+def _print_Info(fp):
     """
-    Return the number of milliseconds corresponding to a timedelta object
+    Print out file information
+    """
+    lcHeader = LCDiskHeader()
+    lcHeader.seekHeaderPosition(fp)
+    lcHeader.readHeader(fp)
+    sample_rate = lcHeader.realSampleRate
+    n_channels = lcHeader.numberOfChannels
 
-    :param tm: timedelta
-    :type  tm: class datetime.timedelta
-    :return: milliseconds
-    :rtype: int
-    """
-    return 1000 * ((tm.days * 86400) + tm.seconds) + \
-        int(tm.microseconds / 1000.)
+    first_data_block = lcHeader.dataStart
+    fp.seek(0, 2)                # Seek end of file
+    last_data_block = int(fp.tell() / 512) - 1
+
+    start_time, temp = _get_times(fp, first_data_block, sample_rate)
+    temp, end_time = _get_times(fp, last_data_block, sample_rate)
+
+    print('n_channels  = {:d}'.format(n_channels))
+    print('sample rate = {:g}'.format(sample_rate))
+    print('start time  = {}'.format(start_time))
+    print('end time    = {}'.format(end_time))
 
 
 if __name__ == '__main__':

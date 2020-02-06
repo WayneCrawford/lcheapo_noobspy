@@ -24,6 +24,7 @@ setuptools.setup(
              'lcfix=lcheapo.lcfix:main',
              'lcdump=lcheapo.lcdump:main',
              'lccut=lcheapo.lccut:main',
+             'lcinfo=lcheapo.lcinfo:main',
              'lcheader=lcheapo.lcheader:main'
          ]
     },

@@ -35,7 +35,7 @@ def main():
 
     with open(os.path.join(args.in_dir, args.in_fname), 'rb') as fp:
         # Set/validate last block to read
-        fp.seek(0,2)   # End of file
+        fp.seek(0, 2)   # End of file
         last_file_block = floor(fp.tell()/BLOCK_SIZE)-1
         if args.end:
             if args.end > last_file_block:
@@ -66,10 +66,12 @@ def main():
             exec_messages.append(msg)
             with open(os.path.join(args.out_dir, args.out_fname), 'wb') as of:
                 start_block = args.start
-                fp.seek(start_block*BLOCK_SIZE,0) 
+                fp.seek(start_block * BLOCK_SIZE, 0)
                 while start_block <= args.end:
                     if (args.end-start_block+1) < MAX_BLOCK_READ:  # NEAR EOF
-                        of.write(fp.read((args.end-start_block+1) * BLOCK_SIZE))
+                        of.write(fp.read((args.end
+                                          - start_block
+                                          + 1) * BLOCK_SIZE))
                         break
                     else:
                         of.write(fp.read(MAX_BLOCK_READ * BLOCK_SIZE))

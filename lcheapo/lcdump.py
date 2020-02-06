@@ -61,7 +61,7 @@ def main():
     args = getOptions()
 
     fp = open(args.inFilename, 'rb')
-    if args.printHeader or args.format==3 or args.printDirectory:
+    if args.printHeader or (args.format == 3) or args.printDirectory:
         lcHeader = LCDiskHeader()
         lcHeader.readHeader(fp)
         if args.printHeader:
@@ -80,7 +80,7 @@ def main():
                 print(lcDir)
                 iDir = iDir + 1
 
-    if args.format==3:
+    if args.format == 3:
         firstBlock = lcHeader.dataStart
         if firstBlock == 0:   # normal start block
             firstBlock = 2393
@@ -112,7 +112,7 @@ def main():
     for i in range(0, args.nBlocks):
         lcData.readBlock(fp)
         print("{:8d}:".format(args.startBlock + i), end=' ')
-        if args.format==3:
+        if args.format == 3:
             time = dt.datetime(lcData.year + 2000,
                                lcData.month,
                                lcData.day,
@@ -120,9 +120,9 @@ def main():
                                lcData.minute,
                                lcData.second,
                                lcData.msec * 1000)
-            rec_offset = int((args.startBlock +i - firstBlock) / 4)
+            rec_offset = int((args.startBlock + i - firstBlock) / 4)
             calcTime = firstTime + dt.timedelta(
-                       seconds= rec_offset * lcData.numberOfSamples / sampRate)
+                       seconds=rec_offset*lcData.numberOfSamples/sampRate)
             print("{:2d} | {} | {} | {:8.3f}".format(
                 lcData.muxChannel,
                 calcTime.strftime('%Y/%m/%d-%H:%M:%S.%f')[:-3],
@@ -139,8 +139,6 @@ def main():
             print("ERROR! Shouldn't get here!")
 
 
-# ----------------------------------------------------------------------------------
 # Run 'main' if the script is not imported as a module
-# ----------------------------------------------------------------------------------
 if __name__ == '__main__':
     main()

@@ -183,6 +183,22 @@ class TestLCHEAPOMethods(unittest.TestCase):
             os.path.join(self.testing_path, outfname))
         os.remove(outfname)
 
+    def test_lcinfo(self):
+        """
+        Test lcinfo
+        """
+        # Run the code
+        cmd = f'lcinfo -d {self.path} -i data BUGGY.fix.lch > temp'
+        os.system(cmd)
+
+        # Compare text files
+        self.assertTextFilesEqual(
+            'temp',
+            os.path.join(self.testing_path, 'BUGGY.info.txt')
+            )
+        os.remove('temp')
+        os.remove('process-steps.json')
+
     def test_lcheader(self):
         """
         Test lcheader

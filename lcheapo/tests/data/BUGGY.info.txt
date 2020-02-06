@@ -1,0 +1,4 @@
+n_channels  = 4
+sample rate = 62.5
+start time  = 2019-07-20 11:00:00.008000
+end time    = 2019-07-20 12:08:20.872000
