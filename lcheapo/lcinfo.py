@@ -11,7 +11,7 @@ from __future__ import (absolute_import, division, print_function,
 from future.builtins import *  # NOQA @UnusedWildImport
 
 from . import sdpchain
-from lcheapo import (LCDataBlock, LCDiskHeader)
+from .lcheapo import (LCDataBlock, LCDiskHeader)
 import argparse
 import os
 import datetime

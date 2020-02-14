@@ -18,7 +18,7 @@ setuptools.setup(
     url="https://github.com/WayneCrawford/lcheapo",
     packages=setuptools.find_packages(),
     include_package_data=True,
-    install_requires=['future'],
+    install_requires=['future','jsonref'],
     entry_points={
          'console_scripts': [
              'lcfix=lcheapo.lcfix:main',
