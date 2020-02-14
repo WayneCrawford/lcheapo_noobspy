@@ -204,8 +204,7 @@ class TestLCHEAPOMethods(unittest.TestCase):
         Test lcheader
         """
         # Run the code
-        cmd = os.path.join(self.exec_path, 'lcheader.py') +\
-            ' --no_questions'
+        cmd = f'lcheader --no_questions'
         os.system(cmd)
 
         outfname = 'generic.header.raw.lch'

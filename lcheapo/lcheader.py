@@ -8,21 +8,71 @@ from __future__ import (absolute_import, division, print_function,
 from future.builtins import *  # NOQA @UnusedWildImport
 
 import sys
+import os
 import argparse
-# Should actually be .lcheapo, but doesn't work if lcdump.py is called directly
-from .lcheapo import (LCDiskHeader, LCDirEntry)
-# import sdpchain
 from datetime import datetime, timedelta
+
+from .lcheapo import (LCDiskHeader, LCDirEntry)
+# from . import sdpchain
 
 # ------------------------------------
 # Global Variable Declarations
 # ------------------------------------
+version = {}
+with open(os.path.join(os.path.dirname(__file__), "version.py")) as fp:
+    exec(fp.read(), version)
+
 PROGRAM_NAME = "lcheader"
-VERSION = "1.0"
 bytes_per_block = 512
 dirs_per_block = 16
 blocks_per_dirEntry = 14336
 samples_per_block = 166
+
+
+def main():
+    """main function"""
+    opts = __getOptions()
+
+    if opts.input_file:
+        h = __read_header(opts.input_file)
+    else:
+        h = __generic_header()
+    h, params = __get_parameters(h, opts.no_questions)
+    if opts.dry_run:
+        sys.exit(2)
+    with open(params['filename_prefix']+'.header.raw.lch', 'wb') as fp:
+        # Pre-blank file
+        if opts.noDirectory:
+            fp.write(b'\x00' * bytes_per_block * h.dirStart)
+        else:
+            fp.write(b'\x00' * bytes_per_block * h.dataStart)
+
+        # Write header
+        h.seekHeaderPosition(fp)
+        h.writeHeader(fp)
+        if opts.noDirectory:
+            sys.exit(0)
+
+        # Write directory
+        d = __prep_dirEntry(h.sampleRate)
+        dt = params['wake_time']
+        dirCount = 0
+        samples_per_dirEntry = samples_per_block * blocks_per_dirEntry / \
+            h.numberOfChannels
+        dir_timeoffset = timedelta(seconds=samples_per_dirEntry / h.sampleRate)
+        blocknum = h.dataStart
+        d.seekBlock(fp, h.dirStart)
+        while dt < params['end_time']:
+            d = __make_dirEntry(d, blocknum, dt)
+            d.writeDirEntry(fp)
+            dt += dir_timeoffset
+            dirCount += 1
+            blocknum += blocks_per_dirEntry
+        h.dirCount = dirCount
+        h.seekHeaderPosition(fp)
+        h.writeHeader(fp)
+    # process_step.write()
+    sys.exit(0)
 
 
 def __getOptions():
@@ -47,54 +97,9 @@ def __getOptions():
 
     # Get the filename (the arguments)
     if args.version:
-        print("{} - Version: {}".format(PROGRAM_NAME, VERSION))
+        print("{} - Version: {}".format(PROGRAM_NAME, version['__version__']))
         sys.exit(0)
     return args
-
-
-def main(opts):
-    """main function"""
-    if opts.input_file:
-        h = __read_header(opts.input_file)
-    else:
-        h = __generic_header()
-    h, params = __get_parameters(h, opts.no_questions)
-    if opts.dry_run:
-        return(2)
-    with open(params['filename_prefix']+'.header.raw.lch', 'wb') as fp:
-        # Pre-blank file
-        if opts.noDirectory:
-            fp.write(b'\x00' * bytes_per_block * h.dirStart)
-        else:
-            fp.write(b'\x00' * bytes_per_block * h.dataStart)
-
-        # Write header
-        h.seekHeaderPosition(fp)
-        h.writeHeader(fp)
-        if opts.noDirectory:
-            return(0)
-
-        # Write directory
-        d = __prep_dirEntry(h.sampleRate)
-        dt = params['wake_time']
-        dirCount = 0
-        samples_per_dirEntry = samples_per_block * blocks_per_dirEntry / \
-            h.numberOfChannels
-        dir_timeoffset = timedelta(seconds=samples_per_dirEntry / h.sampleRate)
-        blocknum = h.dataStart
-        d.seekBlock(fp, h.dirStart)
-        while dt < params['end_time']:
-            d = __make_dirEntry(d, blocknum, dt)
-            d.writeDirEntry(fp)
-            dt += dir_timeoffset
-            dirCount += 1
-            blocknum += blocks_per_dirEntry
-        h.dirCount = dirCount
-        h.seekHeaderPosition(fp)
-        h.writeHeader(fp)
-
-    # process_step.write()
-    return(0)
 
 
 def __get_parameters(h, no_questions=False):
@@ -281,7 +286,8 @@ def __get_float(question, default, possibles=False):
     return resp
 
 
+# ---------------------------------------------------------------------------
+# Run 'main' if the script is not imported as a module
+# ---------------------------------------------------------------------------
 if __name__ == '__main__':
-    opts = __getOptions()
-    status = main(opts)
-    sys.exit(status)
+    main()

@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 from future.builtins import *  # NOQA @UnusedWildImport
 
+import sys
 import argparse
 import queue
 import os
@@ -17,7 +18,6 @@ import textwrap
 import copy         # for deepcopy of argparse dictionary
 import logging      # for logging information
 import datetime
-import sys
 
 from .lcheapo import (LCDataBlock, LCDiskHeader, LCDirEntry)
 from . import sdpchain
