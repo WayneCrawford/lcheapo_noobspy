@@ -12,10 +12,11 @@ Overview
 Command-line programs:
 ----------------------
 
-:lcfix: fix common bugs in an LCHEAPO file
-:lcdump: dump raw information from LCHEAPO files
-:lcheader: create an LCHEAPO header + directory
 :lccut: extract section of an LCHEAPO file
+:lcdump: dump raw information from LCHEAPO files
+:lcfix: fix common bugs in an LCHEAPO file
+:lcheader: create an LCHEAPO header + directory
+:lcinfo: return basic information about an LCHEAPO file
 
 Modules:
 ----------------------
