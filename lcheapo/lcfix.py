@@ -455,6 +455,9 @@ def __processInputFile(ifp1, fname, outFileRoot, lcHeader,
 
     if not args.dryrun:
         outfilename = outFileRoot + ".fix.lch"
+        while os.path.exists(outfilename):
+            print(f"output file {outfilename} exists already! Adding another .fix.lch")
+            outfilename += ".fix.lch"
         ofp1 = open(outfilename, 'wb')
     fname_timetears = outFileRoot + '.fix.timetears.txt'
     oftt = open(fname_timetears, 'w')

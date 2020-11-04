@@ -1,0 +1,58 @@
+{
+   "steps" : [
+      {
+         "application" : {
+            "name" : "lc2ms",
+            "version" : "2.0",
+            "description" : "Convert L-CHEAPO data file to mini-SEED.\n"
+         },
+         "execution" : {
+            "date" : "2020-02-12T15:38:58+01:00",
+            "comment" : "commentaire d'execution",
+            "messages" : [
+               "L-CHEAPO file processed : lcfix\\CD47PS20.fix.lch",
+               "Mini-SEED file generated : conv-mseed (v2)\\test4.CD47_SPOBS1_SN-1_DDH_2006_201.mseed",
+               "Mini-SEED file generated : conv-mseed (v2)\\test4.CD47_SPOBS1_SN-1_DHZ_2006_201.mseed"
+            ],
+            "command_line" : "lc2ms C:\\Users\\softdev\\Tests\\seismic_data\\examples\\CD47PS20\\lcfix\\CD47PS20.fix.lch -f -v -d C:\\Users\\softdev\\Tests\\seismic_data\\examples\\CD47PS20 -i ./lcfix -o ./conv-mseed (v2) -m %SPS20.fix.lch:%E.%S_%H_%I_%C_%Y_%D.mseed --experiment test4 --sitename CD47 --sernum SN-1 --obstype SPOBS1 -c commentaire d'execution -p ./config/lc2ms-L2.properties",
+            "exit_status" : 0,
+            "parameters" : {
+               "directory_paths" : {
+                  "base" : "C:\\Users\\softdev\\Tests\\seismic_data\\examples\\CD47PS20",
+                  "input" : "lcfix",
+                  "output" : "conv-mseed (v2)"
+               },
+               "input_files" : [ "CD47PS20.fix.lch" ],
+               "filename_models" : {
+                  "input_name" : "%SPS20.fix.lch",
+                  "output_name" : "%E.%S_%H_%I_%C_%Y_%D.mseed"
+               },
+               "experiment" : "test4",
+               "site_name" : "CD47",
+               "obs" : {
+                  "device_type" : "SPOBS1",
+                  "serial_number" : "SN-1"
+               },
+               "das_bindings" : [],
+               "seed" : {
+                  "record_length" : 4096,
+                  "encoding_format" : 10,
+                  "byte_order" : 1
+               }
+            },
+            "tools" : [
+               {
+                  "version_string" : "lch2mseed version: 0.2\n",
+                  "command_line" : "lch2mseed C:\\Users\\softdev\\Tests\\seismic_data\\examples\\CD47PS20\\lcfix\\CD47PS20.fix.lch -o T-1581518338786 -p CD47 -s SN-1 -t SPOBS1 -c C:\\Users\\softdev\\Projects\\SDPCHAIN_IPGP\\tests\\obsinsu-tools\\lc2ms-v2\\config\\obs-config.csv -r 4096 -e 10 -b 1",
+                  "exit_status" : 0,
+                  "input_file" : "C:\\Users\\softdev\\Tests\\seismic_data\\examples\\CD47PS20\\lcfix\\CD47PS20.fix.lch",
+                  "output_files" : [
+                     "C:\\Users\\softdev\\Tests\\seismic_data\\examples\\CD47PS20\\conv-mseed (v2)\\test4.CD47_SPOBS1_SN-1_DDH_2006_201.mseed",
+                     "C:\\Users\\softdev\\Tests\\seismic_data\\examples\\CD47PS20\\conv-mseed (v2)\\test4.CD47_SPOBS1_SN-1_DHZ_2006_201.mseed"
+                  ]
+               }
+            ]
+         }
+      }
+   ]
+}

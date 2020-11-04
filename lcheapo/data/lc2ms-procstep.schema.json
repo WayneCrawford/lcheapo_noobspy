@@ -1,0 +1,206 @@
+{
+    "parameters": {
+        "id": "#/parameters",
+        "type": "object",
+        "minProperties": 8,
+        "maxProperties": 8,
+        "title": "The Parameters Schema",
+        "description": "An explanation about the purpose of this instance.",
+        "default": {},
+        "additionalProperties": false,
+        "required": [
+            "directory_paths",
+            "input_files",
+            "filename_models",
+            "experiment",
+            "site_name",
+            "obs",
+            "das_bindings",
+            "seed"
+        ],
+        "properties": {
+            "directory_paths": {
+                "id": "#/parameters/properties/directory_paths",
+                "type": "object",
+                "minProperties": 3,
+                "maxProperties": 3,
+                "title": "directory paths",
+                "description": "An explanation about the purpose of this instance.",
+                "default": {},
+                "additionalProperties": false,
+                "required": [ "base", "input", "output" ],
+                "properties": {
+                    "base": {
+                        "$ref": "#/definitions/file_pathname"
+                    },
+                    "input": {
+                        "$ref": "#/definitions/file_pathname"
+                    },
+                    "output": {
+                        "$ref": "#/definitions/file_pathname"
+                    }
+                }
+            },
+            "input_files": {
+                "id": "#/parameters/properties/input_files",
+                "type": "array",
+                "uniqueItems": false,
+                "minItems": 1,
+                "title": "The Input_files Schema",
+                "description": "An explanation about the purpose of this instance.",
+                "default": [],
+                "additionalItems": true,
+                "items": {
+                    "$ref": "#/definitions/file_pathname"
+                }
+            },
+            "filename_models": {
+                "id": "#/parameters/properties/filename_models",
+                "type": "object",
+                "minProperties": 2,
+                "maxProperties": 2,
+                "title": "file name_models",
+                "description": "An explanation about the purpose of this instance.",
+                "default": {},
+                "additionalProperties": false,
+                "required": [ "input_name", "output_name" ],
+                "properties": {
+                    "input_name": {
+                        "$ref": "#/definitions/filename_model"
+                    },
+                    "output_name": {
+                        "$ref": "#/definitions/filename_model"
+                    }
+                }
+            },
+            "experiment": {
+                "$ref": "#/definitions/experiment_name"
+            },
+            "site_name": {
+                "$ref": "#/definitions/site_name"
+            },
+            "obs": {
+                "id": "#/parameters/properties/obs",
+                "type": "object",
+                "minProperties": 2,
+                "maxProperties": 2,
+                "title": "OBS parameters",
+                "description": "An explanation about the purpose of this instance.",
+                "default": {},
+                "additionalProperties": false,
+                "required": [ "device_type", "serial_number" ],
+                "properties": {
+                    "device_type": {
+                        "$ref": "#/definitions/device_type"
+                    },
+                    "serial_number": {
+                        "$ref": "#/definitions/serial_number"
+                    }
+                }
+            },
+            "das_bindings": {
+                "id": "#/parameters/properties/das_bindings",
+                "type": "array",
+                "uniqueItems": false,
+                "minItems": 0,
+                "title": "DAS bindings",
+                "description": "An explanation about the purpose of this instance.",
+                "default": [],
+                "additionalItems": true
+            },
+            "seed": {
+                "id": "#/parameters/properties/seed",
+                "type": "object",
+                "minProperties": 3,
+                "maxProperties": 3,
+                "title": "The Seed Schema",
+                "description": "An explanation about the purpose of this instance.",
+                "default": {},
+                "additionalProperties": false,
+                "required": [ "record_length", "encoding_format", "byte_order" ],
+                "properties": {
+                    "record_length": {
+                        "$ref": "#/definitions/record_length"
+                    },
+                    "encoding_format": {
+                        "$ref": "#/definitions/encoding_format"
+                    },
+                    "byte_order": {
+                        "$ref": "#/definitions/byte_order"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "file_pathname": {
+            "id": "#/definitions/file_pathname",
+            "type": "string",
+            "minLength": 1,
+            "title": "file path name",
+            "description": "An explanation about the purpose of this instance.",
+            "default": ""
+        },
+        "filename_model": {
+            "id": "#/definitions/filename_model",
+            "type": "string",
+            "minLength": 1,
+            "title": "The Input_name Schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": ""
+        },
+        "experiment_name": {
+            "id": "#/definitions/experiment_name",
+            "type": "string",
+            "minLength": 1,
+            "title": "experiment or campaign name",
+            "description": "An explanation about the purpose of this instance.",
+            "default": ""
+        },
+        "site_name": {
+            "id": "#/definitions/site_name",
+            "type": "string",
+            "minLength": 1,
+            "title": "site name",
+            "description": "An explanation about the purpose of this instance.",
+            "default": ""
+        },
+        "device_type": {
+            "id": "#/definitions/device_type",
+            "type": "string",
+            "minLength": 1,
+            "title": "device type",
+            "description": "An explanation about the purpose of this instance.",
+            "default": ""
+        },
+        "serial_number": {
+            "id": "#/definitions/serial_number",
+            "type": "string",
+            "minLength": 1,
+            "title": "serial number",
+            "description": "An explanation about the purpose of this instance.",
+            "default": ""
+        },
+        "record_length": {
+            "id": "#/definitions/record_length",
+            "type": "integer",
+            "title": "SEED record length",
+            "description": "An explanation about the purpose of this instance.",
+            "default": 0
+        },
+        "encoding_format": {
+            "id": "#/definitions/encoding_format",
+            "type": "integer",
+            "title": "SEED encoding format",
+            "description": "An explanation about the purpose of this instance.",
+            "default": 0
+        },
+        "byte_order": {
+            "id": "#/definitions/byte_order",
+            "type": "integer",
+            "title": "SEED byte order",
+            "description": "An explanation about the purpose of this instance.",
+            "default": 0
+        }
+    }
+}

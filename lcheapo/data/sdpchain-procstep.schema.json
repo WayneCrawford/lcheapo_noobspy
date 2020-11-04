@@ -1,0 +1,268 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "id": "sdpchain-procstep.schema.json",
+    "type": "object",
+    "minProperties": 1,
+    "maxProperties": 1,
+    "title": "Processing Steps document",
+    "description": "Processing steps for conversion of seismological data",
+    "additionalProperties": false,
+    "required": [ "steps" ],
+    "properties": {
+        "steps": {
+            "id": "#/properties/steps",
+            "type": "array",
+            "uniqueItems": false,
+            "minItems": 0,
+            "title": "processings steps",
+            "description": "list of processing steps",
+            "default": [],
+            "additionalItems": true,
+            "items": {
+                "id": "#/properties/steps/items",
+                "type": "object",
+                "minProperties": 0,
+                "title": "processing step",
+                "description": "An explanation about the purpose of this instance.",
+                "default": {},
+                "additionalProperties": false,
+                "required": [ "application", "execution" ],
+                "properties": {
+                    "application": {
+                        "id": "#/properties/steps/items/properties/application",
+                        "type": "object",
+                        "minProperties": 3,
+                        "maxProperties": 3,
+                        "title": "The Application Schema",
+                        "description": "An explanation about the purpose of this instance.",
+                        "default": {},
+                        "additionalProperties": false,
+                        "required": [ "name", "version", "description" ],
+                        "properties": {
+                            "name": {
+                                "$ref": "#/definitions/application_name"
+                            },
+                            "version": {
+                                "$ref": "#/definitions/application_version"
+                            },
+                            "description": {
+                                "$ref": "#/definitions/application_description"
+                            }
+                        }
+                    },
+                    "execution": {
+                        "id": "#/properties/steps/items/properties/execution",
+                        "type": "object",
+                        "minProperties": 7,
+                        "maxProperties": 7,
+                        "title": "execution step",
+                        "description": "An explanation about the purpose of this instance.",
+                        "default": {},
+                        "additionalProperties": false,
+                        "required": [
+                            "date",
+                            "comment",
+                            "messages",
+                            "command_line",
+                            "exit_status",
+                            "parameters",
+                            "tools"
+                        ],
+                        "properties": {
+                            "date": {
+                                "$ref": "#/definitions/execution_datetime"
+                            },
+                            "comment": {
+                                "$ref": "#/definitions/execution_comment"
+                            },
+                            "messages": {
+                                "id": "#/properties/steps/items/properties/execution/properties/messages",
+                                "type": "array",
+                                "uniqueItems": false,
+                                "minItems": 0,
+                                "title": "execution messages",
+                                "description": "An explanation about the purpose of this instance.",
+                                "default": [],
+                                "additionalItems": true,
+                                "items": {
+                                    "$ref": "#/definitions/execution_message"
+                                }
+                            },
+                            "command_line": {
+                                "$ref": "#/definitions/command_line"
+                            },
+                            "exit_status": {
+                                "$ref": "#/definitions/exit_status"
+                            },
+                            "parameters": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "lc2ms-procstep.schema.json#/parameters"
+                                    },
+                                    {
+                                        "$ref": "mscat-procstep.schema.json#/parameters"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    }
+                                ]
+                            },
+                            "tools": {
+                                "id": "#/properties/steps/items/properties/execution/properties/tools",
+                                "type": "array",
+                                "uniqueItems": false,
+                                "minItems": 0,
+                                "title": "executed tools",
+                                "description": "An explanation about the purpose of this instance.",
+                                "default": [],
+                                "additionalItems": true,
+                                "items": {
+                                    "id": "#/properties/steps/items/properties/execution/properties/tools/items",
+                                    "type": "object",
+                                    "minProperties": 0,
+                                    "title": "executed tool",
+                                    "description": "An explanation about the purpose of this instance.",
+                                    "default": {},
+                                    "additionalProperties": true,
+                                    "required": [ "version_string", "command_line", "exit_status" ],
+                                    "properties": {
+                                        "version_string": {
+                                            "$ref": "#/definitions/tool_version"
+                                        },
+                                        "command_line": {
+                                            "$ref": "#/definitions/tool_commandline"
+                                        },
+                                        "exit_status": {
+                                            "$ref": "#/definitions/tool_exitstatus"
+                                        },
+                                        "input_file": {
+                                            "$ref": "#/definitions/file_pathname"
+                                        },
+                                        "output_files": {
+                                            "id": "#/properties/steps/items/properties/execution/properties/tools/items/properties/output_files",
+                                            "type": "array",
+                                            "uniqueItems": false,
+                                            "minItems": 0,
+                                            "title": "output files paths",
+                                            "description": "An explanation about the purpose of this instance.",
+                                            "default": [],
+                                            "additionalItems": true,
+                                            "items": {
+                                                "$ref": "#/definitions/file_pathname"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "application_name": {
+            "id": "#/definitions/application_name",
+            "type": "string",
+            "minLength": 1,
+            "title": "application name",
+            "description": "An explanation about the purpose of this instance.",
+            "default": ""
+        },
+        "application_version": {
+            "id": "#/definitions/application_version",
+            "type": "string",
+            "minLength": 0,
+            "title": "application version",
+            "description": "An explanation about the purpose of this instance.",
+            "default": ""
+        },
+        "application_description": {
+            "id": "#/definitions/application_description",
+            "type": "string",
+            "minLength": 0,
+            "title": "application description",
+            "description": "An explanation about the purpose of this instance.",
+            "default": ""
+        },
+        "execution_datetime": {
+            "id": "#/definitions/execution_datetime",
+            "type": "string",
+            "minLength": 0,
+            "title": "execution date and time",
+            "description": "Date-time in ISO format with Z for GMT+0",
+            "default": "",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]*)?([zZ]|([\\+-])([0-9]{2}):?([0-9]{2})?)?$"
+        },
+        "execution_comment": {
+            "id": "#/definitions/execution_comment",
+            "title": "execution comment",
+            "description": "An explanation about the purpose of this instance.",
+            "oneOf": [
+                {
+                    "type": "string",
+                    "minLength": 0,
+                    "default": ""
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "execution_message": {
+            "id": "#/definitions/execution_message",
+            "type": "string",
+            "minLength": 1,
+            "title": "execution message",
+            "description": "An explanation about the purpose of this instance.",
+            "default": ""
+        },
+        "command_line": {
+            "id": "#/definitions/command_line",
+            "type": "string",
+            "minLength": 1,
+            "title": "command line",
+            "description": "An explanation about the purpose of this instance.",
+            "default": ""
+        },
+        "exit_status": {
+            "id": "#/definitions/exit_status",
+            "type": "integer",
+            "title": "exit status",
+            "description": "An explanation about the purpose of this instance.",
+            "default": 0
+        },
+        "tool_version": {
+            "id": "#/definitions/tool_version",
+            "type": "string",
+            "minLength": 0,
+            "title": "tool version string",
+            "description": "An explanation about the purpose of this instance.",
+            "default": ""
+        },
+        "tool_commandline": {
+            "id": "#/definitions/tool_commandline",
+            "type": "string",
+            "minLength": 1,
+            "title": "tool command line",
+            "description": "An explanation about the purpose of this instance.",
+            "default": ""
+        },
+        "tool_exitstatus": {
+            "id": "#/definitions/tool_exitstatus",
+            "type": "integer",
+            "title": "tool exit status",
+            "description": "An explanation about the purpose of this instance.",
+            "default": 0
+        },
+        "file_pathname": {
+            "id": "#/definitions/file_pathname",
+            "type": "string",
+            "minLength": 1,
+            "title": "file path name",
+            "description": "An explanation about the purpose of this instance.",
+            "default": ""
+        }
+    }
+}

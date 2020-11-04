@@ -1,12 +1,9 @@
 TO DO
 ======================
 
+- lcfix will overwrite a file with suffix 'fix.lch'!!!!!!
+
 - Add sdpchain:process-steps to lcheader (new version #)
-
-
-- Add commonly used routines:
-
-  * lcinfo: give an overview of LCHEAPO files (time range, channels, if times match)
 
 
 - Add wrappers for commonly used routines:

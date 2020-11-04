@@ -1,0 +1,87 @@
+{
+    "parameters": {
+        "id": "#/parameters",
+        "type": "object",
+        "minProperties": 3,
+        "maxProperties": 3,
+        "title": "The Parameters Schema",
+        "description": "An explanation about the purpose of this instance.",
+        "default": {},
+        "additionalProperties": false,
+        "required": [ "directory_paths", "input_files", "filename_models" ],
+        "properties": {
+            "directory_paths": {
+                "id": "#/parameters/properties/directory_paths",
+                "type": "object",
+                "minProperties": 3,
+                "maxProperties": 3,
+                "title": "directory paths",
+                "description": "An explanation about the purpose of this instance.",
+                "default": {},
+                "additionalProperties": false,
+                "required": [ "base", "input", "output" ],
+                "properties": {
+                    "base": {
+                        "$ref": "#/definitions/file_pathname"
+                    },
+                    "input": {
+                        "$ref": "#/definitions/file_pathname"
+                    },
+                    "output": {
+                        "$ref": "#/definitions/file_pathname"
+                    }
+                }
+            },
+            "input_files": {
+                "id": "#/parameters/properties/input_files",
+                "type": "array",
+                "uniqueItems": false,
+                "minItems": 1,
+                "title": "The Input_files Schema",
+                "description": "An explanation about the purpose of this instance.",
+                "default": [],
+                "additionalItems": true,
+                "items": {
+                    "$ref": "#/definitions/file_pathname"
+                }
+            },
+            "filename_models": {
+                "id": "#/parameters/properties/filename_models",
+                "type": "object",
+                "minProperties": 2,
+                "maxProperties": 2,
+                "title": "file name_models",
+                "description": "An explanation about the purpose of this instance.",
+                "default": {},
+                "additionalProperties": false,
+                "required": [ "input_name", "output_name" ],
+                "properties": {
+                    "input_name": {
+                        "$ref": "#/definitions/filename_model"
+                    },
+                    "output_name": {
+                        "$ref": "#/definitions/filename_model"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "file_pathname": {
+            "id": "#/definitions/file_pathname",
+            "type": "string",
+            "minLength": 1,
+            "title": "file path name",
+            "description": "An explanation about the purpose of this instance.",
+            "default": ""
+        },
+        "filename_model": {
+            "id": "#/definitions/filename_model",
+            "type": "string",
+            "minLength": 1,
+            "title": "The Input_name Schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": ""
+        }
+    }
+}

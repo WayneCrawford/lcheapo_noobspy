@@ -1,0 +1,47 @@
+{
+   "steps" : [
+      {
+         "application" : {
+            "name" : "mscat",
+            "version" : "2.0",
+            "description" : "Concatenate miniSEED files into single file.\n"
+         },
+         "execution" : {
+            "date" : "2020-03-12T16:32:32+01:00",
+            "comment" : null,
+            "messages" : [
+               "3 Mini-SEED files to concatenate for trace (Network/Station/Location/Channel) : 4G/LSV5A/00/BHZ",
+               "Mini-SEED file processed : mseed\\4G.LSV5A.00.BHZ.D.2007.201.mseed",
+               "Mini-SEED file processed : mseed\\4G.LSV5A.00.BHZ.D.2007.202.mseed",
+               "Mini-SEED file processed : mseed\\4G.LSV5A.00.BHZ.D.2007.204.mseed",
+               "Mini-SEED file generated : concat1\\4G.LSV5A.00.BHZ_2007-201-210000_concat.mseed"
+            ],
+            "command_line" : "mscat 4G.LSV5A.00.BHZ.D.2007.201.mseed 4G.LSV5A.00.BHZ.D.2007.202.mseed 4G.LSV5A.00.BHZ.D.2007.204.mseed -v -d C:\\Users\\softdev\\Tests\\seismic_data\\tests/4G_LSV5A -i mseed -o concat1 -p ./config/mscat.properties",
+            "exit_status" : 0,
+            "parameters" : {
+               "directory_paths" : {
+                  "base" : "C:\\Users\\softdev\\Tests\\seismic_data\\tests\\4G_LSV5A",
+                  "input" : "mseed",
+                  "output" : "concat1"
+               },
+               "input_files" : [
+                  "4G.LSV5A.00.BHZ.D.2007.204.mseed",
+                  "4G.LSV5A.00.BHZ.D.2007.202.mseed",
+                  "4G.LSV5A.00.BHZ.D.2007.201.mseed"
+               ],
+               "filename_models" : {
+                  "input_name" : null,
+                  "output_name" : "%N.%S.%L.%C_%Y-%D-%T_concat.mseed"
+               }
+            },
+            "tools" : [
+               {
+                  "version_string" : "msmod version: 1.0\n",
+                  "command_line" : "msmod \"4G.LSV5A.00.BHZ.D.2007.201.mseed\" \"4G.LSV5A.00.BHZ.D.2007.202.mseed\" \"4G.LSV5A.00.BHZ.D.2007.204.mseed\" -o \"4G.LSV5A.00.BHZ_2007-201-210000_concat.mseed\"",
+                  "exit_status" : 0
+               }
+            ]
+         }
+      }
+   ]
+}
