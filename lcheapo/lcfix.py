@@ -38,9 +38,9 @@ class BugCounters():
         BUG1: 1-second errors in time tag_regexp
         BUG2: Other isoluated errors in time tag_reg
         BUG3: Incorrect directory entry length
+        bad_hdr: unexpected header value
         Time Tear: Bug1 or Bug2 for more than two consecutive samples, must
                    be manually repaired
-        Unexpected Header Value:
     """
     def __init__(self):
         self.bug1 = 0
@@ -313,13 +313,13 @@ def __stopProcess(commandQ):
     return False
 
 
-def __endBUG3(startBlock, endBlock):
-    global startBUG3
-    if startBUG3 >= 0:
+def __endBUG1A(startBlock, endBlock):
+    global startBUG1A
+    if startBUG1A >= 0:
         logging.info("{:8d}:  End LCHEAPO BUG #3 (started at {:d})".format(
                      endBlock, startBlock))
         global printHeader
-        startBUG3 = -1
+        startBUG1A = -1
         printHeader = ''
 
 
@@ -477,12 +477,12 @@ def _process_input_file(ifp1, fname, outFileRoot, lcHeader,
     :rtype: `tuple`
     """
     # Declare variables
-    global startBUG3, printHeader, lcDir, warnings
+    global startBUG1A, printHeader, lcDir, warnings
     i = 0
     counters = BugCounters()
     lastBUG1s = [0, 0, 0, 0]
     printHeader = ''
-    startBUG3 = -1
+    startBUG1A = -1
     prev_mux_chan = -1
     prev_block_flag = 73
     prev_num_samps = 166
@@ -550,8 +550,8 @@ def _process_input_file(ifp1, fname, outFileRoot, lcHeader,
         if debug and (i > lastInpBlock - 10):
             logging.info("  READ")
         currBlock = int(ifp1.tell() / 512) - 1
-        if startBUG3 >= 0 and currBlock > (lastBUG1s[0] + 500):
-            __endBUG3(startBUG3, currBlock)
+        if startBUG1A >= 0 and currBlock > (lastBUG1s[0] + 500):
+            __endBUG1A(startBUG1A, currBlock)
         if i != currBlock:
             raise ValueError(
                 f"Current Block ({currBlock:d}) != expected ({i:d})")
@@ -659,12 +659,12 @@ def _process_input_file(ifp1, fname, outFileRoot, lcHeader,
                 else:
                     # LCHEAPO BUG - A second is dropped (then recovered)
                     if lastBUG1s[0] == currBlock - 500:
-                        if startBUG3 < 0:
+                        if startBUG1A < 0:
                             txt = "{}{:8d}: LCHEAPO BUG #1a. BUG #1s " +\
                                   "repeating at 500-block intervals"
                             logging.info(txt.format(printHeader,
                                                     currBlock))
-                            startBUG3 = currBlock
+                            startBUG1A = currBlock
                             printHeader = '      '
                     else:
                         txt = "{}{:8d}: LCHEAPO BUG #1. CH{:d} " +\
@@ -853,11 +853,11 @@ def _process_input_file(ifp1, fname, outFileRoot, lcHeader,
     # If there is no tear, remove the timetears file
     if counters.time_tear == 0:
         os.remove(fname_timetears)
-        return counters, message, outfilename
-    # Otherwise, remove the output data file
-    else:
+    # Otherwise, if not forced time corrections, remove the output data file
+    elif not args.forceTime:
         os.remove(outfilename)
         return counters, message, fname_timetears
+    return counters, message, outfilename
 
 
 def _log_error_2(type, printHeader, currBlock, chan, expect_time, t):
