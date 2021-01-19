@@ -55,8 +55,8 @@ INFO
 INFO   REDUCING NUMBER OF DIRECTORY ENTRIES IN HEADER FROM 229 TO 1
 INFO =================================================================================================
 INFO Overall: 1 files, 0 BUG1s, 0 BUG2s, 0 BUG3s, 48 Time Tears, 0 unexpected header values
-INFO   Time Tear=Bad time tag (BUG1 or BUG2) for more than two consecutive samples.  Could be long
-INFO       stretch of bad records or an offset in records (must be fixed)
+INFO   Time Tear=Bad time tag (BUG1 or BUG2) for more than two consecutive samples. Could be a long
+            stretch of bad records or an offset in records. MUST BE REPAIRED
 WARNING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 WARNING YOU HAVE 48 TIME TEARS: YOU MUST ELIMINATE THEM BEFORE CONTINUING!!!
 WARNING Use "lcdump.py OBSfile.*.lch STARTBLOCK NUMBLOCKS" to look at suspect sections

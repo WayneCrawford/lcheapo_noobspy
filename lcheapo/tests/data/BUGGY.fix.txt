@@ -5,7 +5,7 @@ INFO     3876: LCHEAPO BUG #1. CH0 Expected Time: 2019-07-20 11:00:34.536000, Go
 INFO     3877: LCHEAPO BUG #1. CH1 Expected Time: 2019-07-20 11:00:34.536000, Got: 2019-07-20 11:00:33.536000 
 INFO     3878: LCHEAPO BUG #1. CH2 Expected Time: 2019-07-20 11:00:34.536000, Got: 2019-07-20 11:00:33.536000 
 INFO     3879: LCHEAPO BUG #1. CH3 Expected Time: 2019-07-20 11:00:34.536000, Got: 2019-07-20 11:00:33.536000 
-INFO     4376: LCHEAPO BUG #3. BUG #1s repeating at 500-block intervals
+INFO     4376: LCHEAPO BUG #1a. BUG #1s repeating at 500-block intervals
 INFO   BUGGY.raw.lch=>BUGGY.fix.lch: Finished at block 9999 (52 BUG1s, 0 BUG2s, 0 BUG3s, 0 Time Tears, 0 unexpected header values)
 INFO 
   DIR2, LAST BLOCK (10000) IS BEYOND THE END OF FILE!

@@ -80,4 +80,8 @@ v0.72
 Repairs bug in old software version (8.07J) used on 2-channel SPOBSs (SPOBS1) in which the directory
 length was marked as 16386 blocks when it is actually 14336
 
-  - 0.72.5: fixed error where a file named {SOMETHING}.fix.lch would be overwritten
+  - 0.72.5: fixed error where a file named {SOMETHING}.fix.lch would be
+    overwritten
+  - 0.72.6: made lcfix counters a class.  Fixed a crash when
+    muxChannel == numChannels (1 more than is possible).  Removed
+    handling of zero-filled blocks (gives error now)
