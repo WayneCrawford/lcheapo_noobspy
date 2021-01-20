@@ -85,3 +85,4 @@ length was marked as 16386 blocks when it is actually 14336
   - 0.72.6: made lcfix counters a class.  Fixed a crash when
     muxChannel == numChannels (1 more than is possible).  Removed
     handling of zero-filled blocks (gives error now)
+  - 0.72.7: lcheader now creates a process-steps.json file

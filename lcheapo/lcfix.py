@@ -251,12 +251,6 @@ def _get_options():
     parser.add_argument("-o", dest="output_directory", metavar="OUT_DIR",
                         default='.', help="output file directory (absolute, " +
                                           "or relative to base_dir)")
-#     parser.add_argument("-d", "--directory", dest="base_dir",
-#                         default='.', help="Base directory for files")
-#     parser.add_argument("-i", "--input", dest="in_dir", default='.',
-#                         help="path to input files (abs, or rel to base)")
-#     parser.add_argument("-o", "--output", dest="out_dir", default='.',
-#                         help="path for output files (abs, or rel to base)")
     parser.add_argument("-F", "--forceTimes", dest="forceTime", default=False,
                         action="store_true",
                         help="Force timetags to be consecutive")

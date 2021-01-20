@@ -7,10 +7,8 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 from future.builtins import *  # NOQA @UnusedWildImport
 
-
 import os
 import json
-# import copy         # for deepcopy of argparse dictionary
 
 
 def setup_paths(args):
@@ -61,18 +59,18 @@ def make_process_steps_file(app_name, app_description, app_version,
     :type  app_name: string
     :param app_description: one-line description of the application
     :type  app_description: string
-    :param app_version: applicatino versionString
+    :param app_version: application versionString
     :type  app_version: string
     :param exec_cmdline: the command line
     :type  exec_cmdline: string
     :param exec_date: start time of program execution
     :type  exec_date: string
-    :param exec_tools: applications called by the main application
-    :type  exec_tools: list of strings
-    :param exec_parameters: execution parameters
-    :type  exec_parameters: dictionary
     :param exec_messages: messages from execution
     :type  exec_messages: list of strings
+    :param exec_parameters: execution parameters
+    :type  exec_parameters: dictionary
+    :param exec_tools: applications called by the main application
+    :type  exec_tools: list of strings
     :param exec_return_code: return code of run
     :type  exec_return_code: numeric
     :param base_directory: where to write/append process-steps.json

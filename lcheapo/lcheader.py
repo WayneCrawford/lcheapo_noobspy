@@ -13,7 +13,9 @@ import argparse
 from datetime import datetime, timedelta
 
 from .lcheapo import (LCDiskHeader, LCDirEntry)
-# from . import sdpchain
+from .version import __version__
+
+from . import sdpchain
 
 # ------------------------------------
 # Global Variable Declarations
@@ -71,8 +73,19 @@ def main():
         h.dirCount = dirCount
         h.seekHeaderPosition(fp)
         h.writeHeader(fp)
-    # process_step.write()
-    sys.exit(0)
+        returnCode=0
+        params['wake_time'] = params['wake_time'].isoformat()
+        params['end_time'] = params['end_time'].isoformat()
+        sdpchain.make_process_steps_file(
+            'lcheader',
+            'Create an LCHEAPO header and directory',
+            version['__version__'],
+            " ".join(sys.argv),
+            datetime.strftime(datetime.utcnow(),  '%Y-%m-%dT%H:%M:%S'),
+            returnCode,
+            os.getcwd(),
+            exec_parameters=params)
+    sys.exit(returnCode)
 
 
 def __getOptions():
@@ -131,6 +144,12 @@ def __get_parameters(h, no_questions=False):
     datalen_blocks = int(datalen_seconds * h.sampleRate / samples_per_block) *\
         h.numberOfChannels
     h.writeBlock = h.dataStart + datalen_blocks
+    
+    
+    params['sample_rate'] = h.realSampleRate
+    params['number_of_channels'] = h.numberOfChannels
+    params['description'] = h.description
+
     return h, params
 
 
