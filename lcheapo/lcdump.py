@@ -3,9 +3,10 @@
 """
 Dump record information from an LCHEAPO file
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-from future.builtins import *  # NOQA @UnusedWildImport
+# from __future__ import (absolute_import, division, print_function,
+#                         unicode_literals)
+# from future.builtins import *  # NOQA @UnusedWildImport
+from pathlib import Path
 
 import sys
 import argparse
@@ -18,11 +19,12 @@ from .lcheapo import (LCDiskHeader, LCDirEntry, LCDataBlock)
 # Global Variable Declarations
 # ------------------------------------
 PROGRAM_NAME = "lcdump"
-VERSION = "0.2.2"
+VERSION = "0.2.3"
 version_notes = """
     v0.2 (2015/01): WCC added format options
     v0.2.1 (2017/01): WCC added possibility to compare time with theoretical
     v0.2.2 (2017/03): WCC added directory printing
+    v0.2.3 (2017/03): Added "--reverse" option
     """
 
 
@@ -36,6 +38,8 @@ def getOptions():
                         help="block at which to start dump")
     parser.add_argument("nBlocks", type=int, default=10,
                         help="number of blocks to dump")
+    parser.add_argument("-r", "--reverse", default=False, action="store_true",
+                        help="Count startBlocks back from end of file")
     parser.add_argument("-v", "--version", default=False, action="store_true",
                         help="Display Program Version")
     parser.add_argument("-p", "--printHeader", default=False,
@@ -59,6 +63,9 @@ def getOptions():
 def main():
 
     args = getOptions()
+
+    if args.reverse is True:
+        args.startBlock = int(Path(args.inFilename).stat().st_size/512)-args.startBlock
 
     fp = open(args.inFilename, 'rb')
     if args.printHeader or (args.format == 3) or args.printDirectory:
