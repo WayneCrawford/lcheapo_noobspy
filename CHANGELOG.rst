@@ -87,4 +87,5 @@ length was marked as 16386 blocks when it is actually 14336
     handling of zero-filled blocks (gives error now)
   - 0.72.7: lcheader now creates a process-steps.json file
   - 0.72.8: `lcheader` outputs header.lch instead of header.raw.lch. `lcinfo`
-            no longer creates a process-step (no processing!)
+            no longer creates a process-step (no processing!). `lcdump` added
+            a --from_end option to show blocks at end of file

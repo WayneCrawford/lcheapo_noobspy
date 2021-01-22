@@ -24,7 +24,7 @@ version_notes = """
     v0.2 (2015/01): WCC added format options
     v0.2.1 (2017/01): WCC added possibility to compare time with theoretical
     v0.2.2 (2017/03): WCC added directory printing
-    v0.2.3 (2017/03): Added "--reverse" option
+    v0.2.3 (2017/03): Added "--from_end" option
     """
 
 
@@ -38,7 +38,7 @@ def getOptions():
                         help="block at which to start dump")
     parser.add_argument("nBlocks", type=int, default=10,
                         help="number of blocks to dump")
-    parser.add_argument("-r", "--reverse", default=False, action="store_true",
+    parser.add_argument("-r", "--from_end", default=False, action="store_true",
                         help="Count startBlocks back from end of file")
     parser.add_argument("-v", "--version", default=False, action="store_true",
                         help="Display Program Version")
@@ -64,7 +64,7 @@ def main():
 
     args = getOptions()
 
-    if args.reverse is True:
+    if args.from_end is True:
         args.startBlock = int(Path(args.inFilename).stat().st_size/512)-args.startBlock
 
     fp = open(args.inFilename, 'rb')
