@@ -3,12 +3,13 @@
 """
 Create/modify an LCHEAPO data file header
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-from future.builtins import *  # NOQA @UnusedWildImport
+# from __future__ import (absolute_import, division, print_function,
+#                         unicode_literals)
+# from future.builtins import *  # NOQA @UnusedWildImport
 
 import sys
 import os
+import math as m
 import argparse
 from datetime import datetime, timedelta
 
@@ -42,7 +43,7 @@ def main():
     h, params = __get_parameters(h, opts.no_questions)
     if opts.dry_run:
         sys.exit(2)
-    with open(params['filename_prefix']+'.header.lch', 'wb') as fp:
+    with open(params['output_filename'], 'wb') as fp:
         # Pre-blank file
         if opts.noDirectory:
             fp.write(b'\x00' * bytes_per_block * h.dirStart)
@@ -76,6 +77,7 @@ def main():
         returnCode=0
         params['wake_time'] = params['wake_time'].isoformat()
         params['end_time'] = params['end_time'].isoformat()
+
         sdpchain.make_process_steps_file(
             'lcheader',
             'Create an LCHEAPO header and directory',
@@ -117,16 +119,17 @@ def __getOptions():
 
 def __get_parameters(h, no_questions=False):
     """Imitate LCHEAPO parameter menu, return values"""
+    filename_prefix="generic"
     params = dict(wake_time=datetime(2017, 1, 1, 5, 0, 0),
                   end_time=datetime(2018, 1, 1, 5, 0, 0),
-                  filename_prefix="generic")
+                  output_filename=filename_prefix + '.header.lch')
     while not __validate_params(h, params, no_questions):
         h.description = __get_string("Description (Cruise_InstModel_SN_Site)",
                                      h.description)
-        h.sampleRate = __get_int("Sample Rate",
+        h.realSampleRate = __get_float("Sample Rate",
                                  h.sampleRate,
-                                 [31, 62, 125, 250, 500, 1000, 2000, 4000])
-        h.realSampleRate = h.getRealSampleRate(h.sampleRate)
+                                 [31.25, 62.5, 125, 250, 500, 1000, 2000, 4000])
+        h.sampleRate = m.floor(h.realSampleRate)
         h.numberOfChannels = __get_int("Number of Channels",
                                        h.numberOfChannels,
                                        [1, 2, 3, 4])
@@ -135,8 +138,9 @@ def __get_parameters(h, no_questions=False):
         if params['end_time'] < params['wake_time']:
             params['end_time'] = params['wake_time'] + timedelta(days=365)
         params['end_time'] = __get_datetime("End Time", params['end_time'])
-        params['filename_prefix'] = __get_string("Output Filename Prefix",
-                                                 params['filename_prefix'])
+        filename_prefix = __get_string("Output Filename Prefix",
+                                       filename_prefix)
+        params['output_filename'] = filename_prefix + '.header.lch'
 
     datalen = params['end_time'] - params['wake_time']
     datalen_seconds = datalen.days * 86400 + datalen.seconds + \
@@ -159,14 +163,12 @@ def __validate_params(h, params, no_questions):
         return True
 
     print('**** PARAMETERS ****')
-    print('         Description: {}'.format(h.description))
-    print('         Sample Rate: {:d} ({:.1f} real)'.format(h.sampleRate,
-                                                            h.realSampleRate))
-    print('  Number of Channels: {}'.format(h.numberOfChannels))
-    print('           Wake Time: {}'.format(params['wake_time'].isoformat()))
-    print('            End Time: {}'.format(params['end_time'].isoformat()))
-    print('     Output Filename: {}'.format(params['filename_prefix'] +
-                                            '.header.lch'))
+    print(f'         Description: {h.description}')
+    print(f'         Sample Rate: {h.realSampleRate:g}')
+    print(f'  Number of Channels: {h.numberOfChannels}')
+    print(f'           Wake Time: {params["wake_time"].isoformat()}')
+    print(f'            End Time: {params["end_time"].isoformat()}')
+    print(f'     Output Filename: {params["output_filename"]}')
     resp = input('Is this acceptable? [y/N]: ')
     if not resp:
         return False
@@ -296,11 +298,14 @@ def __get_float(question, default, possibles=False):
         try:
             resp = float(resp)
         except ValueError:
-            print('Invalid input: {}'.format(resp))
+            if isinstance(possibles, list):
+                print('Input must be one of: {}'.format(str(possibles)))
+            else:
+                print('Invalid input: {}'.format(resp))
             resp = __get_float(question, default, possibles)
         if isinstance(possibles, list):
             if resp not in possibles:
-                print('Input must be one of: {:d}'.format(possibles))
+                print('Input must be one of: {}'.format(str(possibles)))
                 resp = __get_float(question, default, possibles)
     return resp
 

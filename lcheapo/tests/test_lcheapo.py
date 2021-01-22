@@ -215,6 +215,7 @@ class TestLCHEAPOMethods(unittest.TestCase):
             outfname,
             os.path.join(self.testing_path, outfname))
         os.remove(outfname)
+        os.remove('process-steps.json')
 
 
 def suite():
