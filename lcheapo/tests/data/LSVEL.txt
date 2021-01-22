@@ -1,0 +1,7 @@
+**** PARAMETERS ****
+         Description: MOMARL_SPOBS2_04_LSVEL
+         Sample Rate: 62.5
+  Number of Channels: 4
+           Wake Time: 2019-02-04T04:53:30.024000
+            End Time: 2019-06-14T04:04:29
+     Output Filename: LSVEL.header.lch

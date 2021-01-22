@@ -30,17 +30,34 @@ bytes_per_block = 512
 dirs_per_block = 16
 blocks_per_dirEntry = 14336
 samples_per_block = 166
+accepted_sample_rates = [31.25, 62.5, 125, 250, 500, 1000, 2000, 4000]
+accepted_num_channels = [1, 2, 3, 4]
 
 
 def main():
     """main function"""
     opts = __getOptions()
-
+    params = dict(wake_time=datetime(2017, 1, 1, 5, 0, 0),
+                  end_time=datetime(2018, 1, 1, 5, 0, 0),
+                  output_filename='generic.header.lch')
     if opts.input_file:
         h = __read_header(opts.input_file)
     else:
         h = __generic_header()
-    h, params = __get_parameters(h, opts.no_questions)
+    if opts.description:
+        h.description = opts.description
+    if opts.sample_rate:
+        h.realSampleRate = opts.sample_rate
+        h.sampleRate = m.floor(opts.sample_rate)
+    if opts.num_channels:
+        h.numberOfChannels = opts.num_channels
+    if opts.wake_time:
+        params['wake_time'] = __get_datetime(None, opts.wake_time)
+    if opts.end_time:
+        params['end_time'] = __get_datetime(None, opts.end_time)
+    if opts.output_filename:
+        params['output_filename'] = opts.output_filename
+    h, params = _modify_parameters(h, params, opts)
     if opts.dry_run:
         sys.exit(2)
     with open(params['output_filename'], 'wb') as fp:
@@ -74,14 +91,14 @@ def main():
         h.dirCount = dirCount
         h.seekHeaderPosition(fp)
         h.writeHeader(fp)
-        returnCode=0
+        returnCode = 0
         params['wake_time'] = params['wake_time'].isoformat()
         params['end_time'] = params['end_time'].isoformat()
 
         sdpchain.make_process_steps_file(
             'lcheader',
             'Create an LCHEAPO header and directory',
-            version['__version__'],
+            __version__,
             " ".join(sys.argv),
             datetime.strftime(datetime.utcnow(),  '%Y-%m-%dT%H:%M:%S'),
             returnCode,
@@ -97,42 +114,52 @@ def __getOptions():
     # usageStr = "%prog [-h] [-V]"
     parser = argparse.ArgumentParser(
         description="Create/modify an LCHEAPO data file header",
-        )
+        epilog="Interactive unless you specify -d, -s, -c, -w, -e and -o")
     parser.add_argument("-V", "--version", default=False, action="store_true",
                         help="Display Program Version")
     parser.add_argument("-n", "--noDirectory", default=False,
-                        action="store_true", help="Print disk header")
+                        action="store_true", help="don't create a directory")
     parser.add_argument("--dry_run", default=False, action="store_true",
                         help="don't save to disk")
     parser.add_argument("--no_questions", default=False, action="store_true",
                         help="make a generic header, no questions", )
     parser.add_argument("-i", "--input_file",
                         help="input header file to modify")
+    parser.add_argument("-d", "--description",
+                        help="Header Description field (e.g. "
+                             "Experiment_OBSType_SN_Station)")
+    parser.add_argument("-s", "--sample_rate", type=float, metavar="SAMP_RATE",
+                        choices=accepted_sample_rates,
+                        help=f"Sample Rate. Allowed = {accepted_sample_rates}")
+    parser.add_argument("-c", "--num_channels", type=int, metavar="NCHANS",
+                        choices=accepted_num_channels,
+                        help=f"Number of channels. Allowed = {accepted_num_channels}")
+    parser.add_argument("-w", "--wake_time",  metavar="TIME",
+                        help="Start of recorded data (ISO0601 format)")
+    parser.add_argument("-e", "--end_time",  metavar="TIME",
+                        help="End of recorded data (ISO0601 format)")
+    parser.add_argument("-o", "--output_filename", help="Output filename")
     args = parser.parse_args()
 
     # Get the filename (the arguments)
     if args.version:
-        print("{} - Version: {}".format(PROGRAM_NAME, version['__version__']))
+        print(f"{PROGRAM_NAME} - Version: {__version__}")
         sys.exit(0)
     return args
 
 
-def __get_parameters(h, no_questions=False):
+def _modify_parameters(h, params, opts):
     """Imitate LCHEAPO parameter menu, return values"""
-    filename_prefix="generic"
-    params = dict(wake_time=datetime(2017, 1, 1, 5, 0, 0),
-                  end_time=datetime(2018, 1, 1, 5, 0, 0),
-                  output_filename=filename_prefix + '.header.lch')
-    while not __validate_params(h, params, no_questions):
+    filename_prefix = params['output_filename'].split('.')[0]
+    while not __validate_params(h, params, opts):
         h.description = __get_string("Description (Cruise_InstModel_SN_Site)",
                                      h.description)
-        h.realSampleRate = __get_float("Sample Rate",
-                                 h.sampleRate,
-                                 [31.25, 62.5, 125, 250, 500, 1000, 2000, 4000])
+        h.realSampleRate = __get_float("Sample Rate", h.realSampleRate,
+                                       accepted_sample_rates)
         h.sampleRate = m.floor(h.realSampleRate)
         h.numberOfChannels = __get_int("Number of Channels",
                                        h.numberOfChannels,
-                                       [1, 2, 3, 4])
+                                       accepted_num_channels)
 
         params['wake_time'] = __get_datetime("Wake Time", params['wake_time'])
         if params['end_time'] < params['wake_time']:
@@ -148,8 +175,7 @@ def __get_parameters(h, no_questions=False):
     datalen_blocks = int(datalen_seconds * h.sampleRate / samples_per_block) *\
         h.numberOfChannels
     h.writeBlock = h.dataStart + datalen_blocks
-    
-    
+
     params['sample_rate'] = h.realSampleRate
     params['number_of_channels'] = h.numberOfChannels
     params['description'] = h.description
@@ -157,9 +183,9 @@ def __get_parameters(h, no_questions=False):
     return h, params
 
 
-def __validate_params(h, params, no_questions):
+def __validate_params(h, params, opts):
     """Validate header parameters"""
-    if no_questions:
+    if opts.no_questions:
         return True
 
     print('**** PARAMETERS ****')
@@ -169,6 +195,11 @@ def __validate_params(h, params, no_questions):
     print(f'           Wake Time: {params["wake_time"].isoformat()}')
     print(f'            End Time: {params["end_time"].isoformat()}')
     print(f'     Output Filename: {params["output_filename"]}')
+
+    if opts.description and opts.sample_rate and opts.num_channels \
+            and opts.wake_time and opts.end_time and opts.output_filename:
+        return True
+
     resp = input('Is this acceptable? [y/N]: ')
     if not resp:
         return False
@@ -256,18 +287,23 @@ def __get_string(question, default):
 
 def __get_datetime(question, default):
     """Read a datetime from the command line"""
-    resp = input("{} [{}]: ".format(question, default.isoformat()))
-    if not resp:
-        return default
+    if question is not None:
+        resp = input("{} [{}]: ".format(question, default.isoformat()))
+        if not resp:
+            return default
     else:
+        resp = default
+    try:
+        resp = datetime.strptime(resp, '%Y-%m-%dT%H:%M:%S')
+    except ValueError:
         try:
-            resp = datetime.strptime(resp, '%Y-%m-%dT%H:%M:%S')
+            resp = datetime.strptime(resp, '%Y-%m-%dT%H:%M:%S.%f')
         except ValueError:
-            try:
-                resp = datetime.strptime(resp, '%Y-%m-%dT%H:%M:%S.%f')
-            except ValueError:
-                print('Invalid input: {}'.format(resp))
+            print('Invalid input: {}'.format(resp))
+            if question is not None:
                 resp = __get_datetime(question, default)
+            else:
+                sys.exit(2)
     return resp
 
 
@@ -291,7 +327,7 @@ def __get_int(question, default, possibles=False):
 
 def __get_float(question, default, possibles=False):
     """Read a float from the command line"""
-    resp = input("{} [{:d}]: ".format(question, default))
+    resp = input("{} [{:g}]: ".format(question, default))
     if not resp:
         return default
     else:

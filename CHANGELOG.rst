@@ -89,3 +89,5 @@ length was marked as 16386 blocks when it is actually 14336
   - 0.72.8: `lcheader` outputs header.lch instead of header.raw.lch. `lcinfo`
             no longer creates a process-step (no processing!). `lcdump` added
             a --from_end option to show blocks at end of file
+  - 0.72.9: `lcheader` can be run non-interactively using command-line
+            arguments
