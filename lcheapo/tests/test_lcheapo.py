@@ -197,7 +197,6 @@ class TestLCHEAPOMethods(unittest.TestCase):
             os.path.join(self.testing_path, 'BUGGY.info.txt')
             )
         os.remove('temp')
-        os.remove('process-steps.json')
 
     def test_lcheader(self):
         """
@@ -207,7 +206,7 @@ class TestLCHEAPOMethods(unittest.TestCase):
         cmd = f'lcheader --no_questions'
         os.system(cmd)
 
-        outfname = 'generic.header.raw.lch'
+        outfname = 'generic.header.lch'
         # Check that the appropriate file was created
         assert os.path.exists(outfname)
 

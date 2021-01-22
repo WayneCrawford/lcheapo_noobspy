@@ -42,7 +42,7 @@ def main():
     h, params = __get_parameters(h, opts.no_questions)
     if opts.dry_run:
         sys.exit(2)
-    with open(params['filename_prefix']+'.header.raw.lch', 'wb') as fp:
+    with open(params['filename_prefix']+'.header.lch', 'wb') as fp:
         # Pre-blank file
         if opts.noDirectory:
             fp.write(b'\x00' * bytes_per_block * h.dirStart)
@@ -166,7 +166,7 @@ def __validate_params(h, params, no_questions):
     print('           Wake Time: {}'.format(params['wake_time'].isoformat()))
     print('            End Time: {}'.format(params['end_time'].isoformat()))
     print('     Output Filename: {}'.format(params['filename_prefix'] +
-                                            '.header.raw.lch'))
+                                            '.header.lch'))
     resp = input('Is this acceptable? [y/N]: ')
     if not resp:
         return False

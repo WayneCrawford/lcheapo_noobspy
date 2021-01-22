@@ -37,16 +37,17 @@ def main():
         with open(os.path.join(in_filename_path, filename),
                   'rb') as fp:
             _print_Info(fp)
-    sdpchain.make_process_steps_file(
-        'lcinfo',
-        'Return basic information about LCHEAPO files',
-        version['__version__'],
-        " ".join(sys.argv),
-        startTimeStr,
-        returnCode,
-        args.base_directory,
-        exec_messages='',
-        exec_parameters='')
+    # Why add a processing step when there is no processing?
+    # sdpchain.make_process_steps_file(
+    #     'lcinfo',
+    #     'Return basic information about LCHEAPO files',
+    #     version['__version__'],
+    #     " ".join(sys.argv),
+    #     startTimeStr,
+    #     returnCode,
+    #     args.base_directory,
+    #     exec_messages='',
+    #     exec_parameters='')
 
 
 def getOptions():
