@@ -15,7 +15,6 @@ from .lcheapo import (LCDataBlock, LCDiskHeader)
 import argparse
 import os
 import datetime
-import sys
 
 version = {}
 with open(os.path.join(os.path.dirname(__file__), "version.py")) as fp:
@@ -24,30 +23,17 @@ with open(os.path.join(os.path.dirname(__file__), "version.py")) as fp:
 
 def main():
     global warnings
-    # Prepare variables
-    startTimeStr = datetime.datetime.strftime(
-        datetime.datetime.utcnow(), '%Y-%m-%dT%H:%M:%S')
-    returnCode = 0
 
     # GET ARGUMENTS
     args = getOptions()
-    in_filename_path, out_filename_path = sdpchain.setup_paths(args)
+    in_filename_path, out_filename_path = sdpchain.setup_paths(args.base_dir,
+                                                               args.in_dir,
+                                                               args.out_dir)
 
     for filename in args.infiles:
         with open(os.path.join(in_filename_path, filename),
                   'rb') as fp:
             _print_Info(fp)
-    # Why add a processing step when there is no processing?
-    # sdpchain.make_process_steps_file(
-    #     'lcinfo',
-    #     'Return basic information about LCHEAPO files',
-    #     version['__version__'],
-    #     " ".join(sys.argv),
-    #     startTimeStr,
-    #     returnCode,
-    #     args.base_directory,
-    #     exec_messages='',
-    #     exec_parameters='')
 
 
 def getOptions():
@@ -59,12 +45,12 @@ def getOptions():
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("infiles", metavar="inFileName", nargs='+',
                         help="Input filename(s)")
-    parser.add_argument("-d", dest="base_directory", metavar="BASE_DIR",
+    parser.add_argument("-d", dest="base_dir", metavar="BASE_DIR",
                         default='.', help="base directory for files")
-    parser.add_argument("-i", dest="input_directory", metavar="IN_DIR",
+    parser.add_argument("-i", dest="in_dir", metavar="IN_DIR",
                         default='.', help="input file directory (absolute, " +
                                           "or relative to base_dir)")
-    parser.add_argument("-o", dest="output_directory", metavar="IN_DIR",
+    parser.add_argument("-o", dest="out_dir", metavar="IN_DIR",
                         default='.', help="unused")
     args = parser.parse_args()
     return args

@@ -109,7 +109,9 @@ def main():
     responseQ = queue.Queue(0)
 
     # SET UP FILE NAMES and PATHs
-    in_filename_path, out_filename_path = sdpchain.setup_paths(args)
+    in_filename_path, out_filename_path = sdpchain.setup_paths(args.base_dir,
+                                                               args.in_dir,
+                                                               args.out_dir)
     in_filename_root = args.infiles[0].split('.')[0]
     out_filename_root = in_filename_root
 
@@ -202,7 +204,7 @@ def main():
             " ".join(sys.argv),
             startTimeStr,
             returnCode,
-            args.base_directory,
+            args.base_dir,
             exec_messages=msgs,
             exec_parameters=parameters)
 
@@ -243,14 +245,14 @@ def _get_options():
     parser.add_argument("--dryrun", dest="dryrun", default=False,
                         action="store_true",
                         help="do not output fixed LCHEAPO file")
-    parser.add_argument("-d", dest="base_directory", metavar="BASE_DIR",
+    parser.add_argument("-d", dest="base_dir", metavar="BASE_DIR",
                         default='.', help="base directory for files")
-    parser.add_argument("-i", dest="input_directory", metavar="IN_DIR",
-                        default='.', help="input file directory (absolute, " +
-                                          "or relative to base_dir)")
-    parser.add_argument("-o", dest="output_directory", metavar="OUT_DIR",
-                        default='.', help="output file directory (absolute, " +
-                                          "or relative to base_dir)")
+    parser.add_argument("-i", dest="in_dir", metavar="IN_DIR", default='.',
+                        help="input file directory (absolute, " +
+                             "or relative to base_dir)")
+    parser.add_argument("-o", dest="out_dir", metavar="OUT_DIR", default='.',
+                        help="output file directory (absolute, " +
+                             "or relative to base_dir)")
     parser.add_argument("-F", "--forceTimes", dest="forceTime", default=False,
                         action="store_true",
                         help="Force timetags to be consecutive")

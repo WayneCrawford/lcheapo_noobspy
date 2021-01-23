@@ -116,10 +116,9 @@ def getOptions():
                         help="path for output files (abs, or rel to base)")
     args = parser.parse_args()
 
-    if not os.path.isabs(args.in_dir):
-        args.in_dir = os.path.join(args.base_dir, args.in_dir)
-    if not os.path.isabs(args.out_dir):
-        args.out_dir = os.path.join(args.base_dir, args.out_dir)
+    args.in_dir, args.out_dir = sdpchain.setup_paths(args.base_dir,
+                                                     args.in_dir,
+                                                     args.out_dir)
     return args
 
 

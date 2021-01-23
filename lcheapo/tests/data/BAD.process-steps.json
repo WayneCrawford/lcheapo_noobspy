@@ -13,14 +13,14 @@
           "  BAD.bad.lch=>BAD.fix.lch: Finished at block 9999 (0 BUG1s, 0 BUG2s, 0 BUG3s, 48 Time Tears, 0 unexpected header values)"
         ],
         "parameters": {
-          "base_directory": "/Users/crawford/_Work/Programming/lcheapo/lcheapo/tests",
+          "base_dir": "/Users/crawford/_Work/Programming/lcheapo/lcheapo/tests",
           "dryrun": false,
           "forceTime": false,
-          "input_directory": "data",
+          "in_dir": "data",
           "input_files": [
             "BAD.bad.lch"
           ],
-          "output_directory": ".",
+          "out_dir": ".",
           "output_files": [
             "BAD.fix.timetears.txt"
           ],

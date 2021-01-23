@@ -3,40 +3,37 @@
 """
 SDPCHAIN compatibility functions
 """
-import os
+from os import mkdir
+from pathlib import Path
 
 
-def setup_paths(args):
+def setup_paths(base_dir, in_dir, out_dir):
     """
     Set up paths using SDPCHAIN standards
 
-    :parm args: argparse namespace with the following fields
-                 - base_dir: base directory
-                 - infiles: list of input files
-                 - in_dir: directory containing input files
+    :parm base_dir: base directory (for process-steps.json file and as
+                    a basis for in_dir and out_dir)
+    :param in_dir: directory for input files.  absolute path or relative
+                   to base_dir
+    :param out_dir: directory for ourput files.  absolute path or relative
+                   to base_dir
                  - out_dir directory containing output files
-                infiles is a list, the rest are strings
-                the process-steps file will be opened or appended in base_dir
-                in_dir and out_dir are absolute paths, or relative to base_dir
-    :return in_path, out_path: path for input and output files
-    :rtype: tuple
+    :return in_dir, out_dir: base_dir-adjusted paths
     """
-    in_filename_path = _choose_path(args.base_directory, args.input_directory)
-    out_filename_path = _choose_path(args.base_directory,
-                                     args.output_directory)
-    if not os.path.exists(out_filename_path):
-        print("output directory '{}' does not exist, creating...".format(
-            out_filename_path))
-        os.mkdir(out_filename_path)
-    elif not os.path.isdir(out_filename_path):
-        print("output directory '{}' is a file!, changing to base dir".format(
-            out_filename_path))
-        out_filename_path = args.base_directory
-    return in_filename_path, out_filename_path
+    in_path = _choose_path(base_dir, in_dir)
+    out_path = _choose_path(base_dir, out_dir)
+    assert Path(in_path).is_dir()
+    if Path(out_path).exists() is False:
+        print(f"out_dir '{out_path}' does not exist, creating...")
+        mkdir(out_path)
+    elif Path(out_path).is_file():
+        print("out_dir '{out_path}' is a file! Will use  base dir")
+        out_path = base_dir
+    return in_path, out_path
 
 
 def _choose_path(base_dir, sub_dir):
     """ Sets up absolute path to sub-directory """
-    if os.path.isabs(sub_dir):
+    if Path(sub_dir).is_absolute():
         return sub_dir
-    return os.path.join(base_dir, sub_dir)
+    return str(Path(base_dir) / sub_dir)

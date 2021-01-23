@@ -21,6 +21,7 @@ setuptools.setup(
     install_requires=['future','jsonref'],
     entry_points={
          'console_scripts': [
+             'sdpcat=lcheapo.sdpchain:sdpcat',
              'lcfix=lcheapo.lcfix:main',
              'lcdump=lcheapo.lcdump:main',
              'lccut=lcheapo.lccut:main',
