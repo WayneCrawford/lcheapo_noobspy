@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Cut an LCHEAPO file into pieces
+Concatenate files and create/append process-step.json file
 
-Used to remove bad/empty blocks, blocks start with 0 and are 512-bytes
+Uses python standard library's shutil.copyfileobj()
 """
 # from __future__ import (absolute_import, division, print_function,
 #                         unicode_literals)

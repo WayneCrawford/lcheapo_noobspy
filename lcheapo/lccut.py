@@ -10,12 +10,14 @@ from __future__ import (absolute_import, division, print_function,
 from future.builtins import *  # NOQA @UnusedWildImport
 
 import argparse
-import os
+# import os
 from datetime import datetime as dt
 import sys
 from math import floor
+from pathlib import Path
 
 from . import sdpchain
+from .version import __version__
 # from .lcheapo import (LCDataBlock, LCDiskHeader, LCDirEntry)
 
 BLOCK_SIZE = 512
@@ -24,16 +26,24 @@ MAX_BLOCK_READ = 2048   # max number of blocks to read at once
 
 def main():
     start_time_str = dt.strftime(dt.utcnow(), '%Y-%m-%dT%H:%M:%S')
-    version = {}
-    with open(os.path.join(os.path.dirname(__file__), "version.py")) as fp:
-        exec(fp.read(), version)
     return_code = 0
     exec_messages = []
 
     # GET ARGUMENTS
     args = getOptions()
 
-    with open(os.path.join(args.in_dir, args.in_fname), 'rb') as fp:
+    # Verify output filename
+    if not args.out_fname:
+        # Create output filename
+        base = Path(args.in_fname).stem
+        ext = Path(args.in_fname).suffix
+        args.out_fname = f'{base}_{args.start:d}_{args.end:d}{ext}'
+    out_path = Path(args.out_dir) / args.out_fname
+    if out_path.exists():
+        print('output file {out_path} exists already, quitting...')
+        sys.exit(2)
+
+    with open(Path(args.in_dir) / args.in_fname, 'rb') as fp:
         # Set/validate last block to read
         fp.seek(0, 2)   # End of file
         last_file_block = floor(fp.tell()/BLOCK_SIZE)-1
@@ -56,15 +66,11 @@ def main():
             print(msg)
             exec_messages.append(msg)
         else:
-            if not args.out_fname:
-                # Create output filename
-                base, ext = os.path.splitext(args.in_fname)
-                args.out_fname = f'{base}_{args.start:d}_{args.end:d}{ext}'
             msg = 'Writing blocks {:d}-{:d} to {}'.format(
                 args.start, args.end, args.out_fname)
             print(msg)
             exec_messages.append(msg)
-            with open(os.path.join(args.out_dir, args.out_fname), 'wb') as of:
+            with open(out_path, 'wb') as of:
                 start_block = args.start
                 fp.seek(start_block * BLOCK_SIZE, 0)
                 while start_block <= args.end:
@@ -80,7 +86,7 @@ def main():
     sdpchain.make_process_steps_file(
         'lccut',
         __doc__,
-        version['__version__'],
+        __version__,
         " ".join(sys.argv),
         start_time_str,
         return_code,

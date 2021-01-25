@@ -3,7 +3,7 @@
 """
 SDPCHAIN compatibility functions
 """
-import os
+from pathlib import Path
 import json
 
 
@@ -52,13 +52,20 @@ def make_process_steps_file(app_name, app_description, app_version,
     step = {'application': application, 'execution': execution}
     if debug:
         print(json.dumps(step, indent=4, separators=(',', ': ')))
-    filename = os.path.join(base_directory, 'process-steps.json')
+    filename = Path(base_directory) / 'process-steps.json'
     try:
         fp = open(filename, "r")
     except FileNotFoundError:  # File not found
         tree = {"steps": [step]}
     else:   # File found
-        tree = json.load(fp)
+        try:
+            tree = json.load(fp)
+        except Exception:
+            newfilename = unique_path(Path(filename).parents,
+                                      'process-steps{:02d}.txt')
+            print('{filename} exists but unreadable. Writing to {newfilename}')
+            filename = newfilename
+            tree = {}
         if 'steps' in tree:
             tree['steps'].append(step)
         else:
@@ -69,3 +76,12 @@ def make_process_steps_file(app_name, app_description, app_version,
     fp = open(filename, "w")
     json.dump(tree, fp, sort_keys=True, indent=2)   # For real
     fp.close
+    
+    def unique_path(directory, name_pattern):
+        counter = 0
+        while True:
+            counter += 1
+            path = directory / name_pattern.format(counter)
+            if not path.exists():
+                return path
+

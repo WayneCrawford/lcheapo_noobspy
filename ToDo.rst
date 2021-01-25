@@ -1,10 +1,28 @@
 TO DO
 ======================
 
-- lcfix will overwrite a file with suffix 'fix.lch'!!!!!!
-
-- Add sdpchain:process-steps to lcheader (new version #)
-
+- sdpcat should quit and say why if the output file exists already
+  - and if the input files don't exist
+- lccut also
+- lccut command output should mention input file name
+    - and should save as exec_messages to process-steps
+- sdpcat should list files (and their size?) as it processes them to stdout
+    - and to exec_messages
+- ProcessSteps should have exec_message() function 
+- Make all processing codes use sdpchain and its standard parameters
+    - Need version number upgrade (1.0?)
+- Make lcfix give an intelligent output when it doesn't find a header?
+- Make process-steps a class
+  - init at beggining
+  - modify as you go
+  - exec_message() function that prints a message to the screen and saves to
+    its exec_messages list
+  - write(resultcode) whereever you stop
+- Make sdpchain.argparse
+  - Sets up standard parameters (-d, -i, -o)
+  - Checks if outfile exists (quit if so, unless Force)
+  - Check if infiles exist?
+- Make sdpchain a separate module
 
 - Add wrappers for commonly used routines:
 
