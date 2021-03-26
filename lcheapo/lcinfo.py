@@ -16,9 +16,7 @@ import argparse
 import os
 import datetime
 
-version = {}
-with open(os.path.join(os.path.dirname(__file__), "version.py")) as fp:
-    exec(fp.read(), version)
+from .version import __version__
 
 
 def main():
@@ -52,6 +50,8 @@ def getOptions():
                                           "or relative to base_dir)")
     parser.add_argument("-o", dest="out_dir", metavar="IN_DIR",
                         default='.', help="unused")
+    parser.add_argument("--version", action='version',
+                        version='%(prog)s {:s}'.format(__version__))
     args = parser.parse_args()
     return args
 

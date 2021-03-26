@@ -91,3 +91,11 @@ length was marked as 16386 blocks when it is actually 14336
             a --from_end option to show blocks at end of file
   - 0.72.9: `lcheader` can be run non-interactively using command-line
             arguments
+  - 0.72.10: adds SDPCHAIN protocol to lcfix, lcheader and lccut
+  - 0.72.11: modify SDPCHAIN to read process-steps from in_dir and write
+    to out_dir.  lcfix now quits if there is already a fix.lch file at
+    the destination. 
+    
+todo::
+- Make output file simply replace raw.lch (or orig.lch) by fix.lch
+    - Maybe reject all other suffixes, except header.lch?

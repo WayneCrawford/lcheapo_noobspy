@@ -8,10 +8,11 @@ Create/modify an LCHEAPO data file header
 # from future.builtins import *  # NOQA @UnusedWildImport
 
 import sys
-import os
+# import os
 import math as m
 import argparse
 from datetime import datetime, timedelta
+from pathlib import Path
 
 from .lcheapo import (LCDiskHeader, LCDirEntry)
 from .version import __version__
@@ -21,10 +22,6 @@ from . import sdpchain
 # ------------------------------------
 # Global Variable Declarations
 # ------------------------------------
-version = {}
-with open(os.path.join(os.path.dirname(__file__), "version.py")) as fp:
-    exec(fp.read(), version)
-
 PROGRAM_NAME = "lcheader"
 bytes_per_block = 512
 dirs_per_block = 16
@@ -37,11 +34,12 @@ accepted_num_channels = [1, 2, 3, 4]
 def main():
     """main function"""
     opts = __getOptions()
+    
     params = dict(wake_time=datetime(2017, 1, 1, 5, 0, 0),
                   end_time=datetime(2018, 1, 1, 5, 0, 0),
                   output_filename='generic.header.lch')
     if opts.input_file:
-        h = __read_header(opts.input_file)
+        h = __read_header(Path(opts.in_dir) / opts.input_file)
     else:
         h = __generic_header()
     if opts.description:
@@ -55,12 +53,12 @@ def main():
         params['wake_time'] = __get_datetime(None, opts.wake_time)
     if opts.end_time:
         params['end_time'] = __get_datetime(None, opts.end_time)
-    if opts.output_filename:
-        params['output_filename'] = opts.output_filename
+    if opts.output_file:
+        params['output_filename'] = opts.output_file
     h, params = _modify_parameters(h, params, opts)
     if opts.dry_run:
         sys.exit(2)
-    with open(params['output_filename'], 'wb') as fp:
+    with open(Path(opts.out_dir) / params['output_filename'], 'wb') as fp:
         # Pre-blank file
         if opts.noDirectory:
             fp.write(b'\x00' * bytes_per_block * h.dirStart)
@@ -96,13 +94,14 @@ def main():
         params['end_time'] = params['end_time'].isoformat()
 
         sdpchain.make_process_steps_file(
+            opts.in_dir,
+            opts.out_dir,
             'lcheader',
             'Create an LCHEAPO header and directory',
             __version__,
             " ".join(sys.argv),
             datetime.strftime(datetime.utcnow(),  '%Y-%m-%dT%H:%M:%S'),
             returnCode,
-            os.getcwd(),
             exec_parameters=params)
     sys.exit(returnCode)
 
@@ -114,7 +113,8 @@ def __getOptions():
     # usageStr = "%prog [-h] [-V]"
     parser = argparse.ArgumentParser(
         description="Create/modify an LCHEAPO data file header",
-        epilog="Interactive unless you specify -d, -s, -c, -w, -e and -o")
+        epilog="Interactive unless you specify --description, -s, -c, -w, -e "
+               "and --output_file")
     parser.add_argument("-V", "--version", default=False, action="store_true",
                         help="Display Program Version")
     parser.add_argument("-n", "--noDirectory", default=False,
@@ -123,9 +123,9 @@ def __getOptions():
                         help="don't save to disk")
     parser.add_argument("--no_questions", default=False, action="store_true",
                         help="make a generic header, no questions", )
-    parser.add_argument("-i", "--input_file",
+    parser.add_argument("--input_file",
                         help="input header file to modify")
-    parser.add_argument("-d", "--description",
+    parser.add_argument("--description",
                         help="Header Description field (e.g. "
                              "Experiment_OBSType_SN_Station)")
     parser.add_argument("-s", "--sample_rate", type=float, metavar="SAMP_RATE",
@@ -138,7 +138,18 @@ def __getOptions():
                         help="Start of recorded data (ISO0601 format)")
     parser.add_argument("-e", "--end_time",  metavar="TIME",
                         help="End of recorded data (ISO0601 format)")
-    parser.add_argument("-o", "--output_filename", help="Output filename")
+    parser.add_argument("--output_file", help="Output filename")
+    parser.add_argument("-d", "--directory", dest="base_dir",
+                        default='.', help="Base directory for files")
+    parser.add_argument("-i", "--input", dest="in_dir", default='.',
+                        help="path to input files (abs, or rel to base)")
+    parser.add_argument("-o", "--output", dest="out_dir", default='.',
+                        help="path for output files (abs, or rel to base)")
+    args = parser.parse_args()
+
+    args.in_dir, args.out_dir = sdpchain.setup_paths(args.base_dir,
+                                                     args.in_dir,
+                                                     args.out_dir)
     args = parser.parse_args()
 
     # Get the filename (the arguments)
@@ -197,7 +208,7 @@ def __validate_params(h, params, opts):
     print(f'     Output Filename: {params["output_filename"]}')
 
     if opts.description and opts.sample_rate and opts.num_channels \
-            and opts.wake_time and opts.end_time and opts.output_filename:
+            and opts.wake_time and opts.end_time and opts.output_file:
         return True
 
     resp = input('Is this acceptable? [y/N]: ')

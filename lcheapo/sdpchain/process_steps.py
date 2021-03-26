@@ -99,38 +99,40 @@ class ProcessSteps():
         fp.close
 
 
-def make_process_steps_file(app_name, app_description, app_version,
-                            exec_cmdline, exec_date, exec_return_code,
-                            base_directory,
-                            exec_messages=[], exec_parameters={},
-                            exec_tools=[], debug=False):
+def make_process_steps_file(in_dir: str, out_dir: str,
+                            app_name: str, app_description: str,
+                            app_version: str, exec_cmdline: str,
+                            exec_date: str, exec_return_code: int,
+                            exec_messages: list=[], exec_parameters: dict={},
+                            exec_tools: list=[], debug: bool=False):
     """
     Make or append to a process-steps.json file
 
+    :param in_dir: directory to read file from
+    :type in_dir: str
+    :param out_dir: directory to write file to
+    :type out_dir: str
     :param app_name: the application name
-    :type  app_name: string
+    :type  app_name: str
     :param app_description: one-line description of the application
-    :type  app_description: string
+    :type  app_description: str
     :param app_version: application versionString
-    :type  app_version: string
+    :type  app_version: str
     :param exec_cmdline: the command line
-    :type  exec_cmdline: string
+    :type  exec_cmdline: str
     :param exec_date: start time of program execution
-    :type  exec_date: string
+    :type  exec_date: str
+    :param exec_return_code: return code of run
+    :type  exec_return_code: numeric
     :param exec_messages: messages from execution
     :type  exec_messages: list of strings
     :param exec_parameters: execution parameters
     :type  exec_parameters: dictionary
     :param exec_tools: applications called by the main application
     :type  exec_tools: list of strings
-    :param exec_return_code: return code of run
-    :type  exec_return_code: numeric
-    :param base_directory: where to write/append process-steps.json
-    :type  base_directory: string
     :return: return code 0
     :rtype:  numeric
     """
-
     application = dict(name=app_name,
                        description=app_description,
                        version=app_version)
@@ -144,16 +146,17 @@ def make_process_steps_file(app_name, app_description, app_version,
     step = {'application': application, 'execution': execution}
     if debug:
         print(json.dumps(step, indent=4, separators=(',', ': ')))
-    filename = Path(base_directory) / 'process-steps.json'
+    filename = 'process-steps.json'
+    in_file = Path(in_dir) / filename
     try:
-        fp = open(filename, "r")
+        fp = open(in_file, "r")
     except FileNotFoundError:  # File not found
         tree = {"steps": [step]}
     else:   # File found
         try:
             tree = json.load(fp)
         except Exception:
-            newfilename = _unique_path(Path(filename).parents,
+            newfilename = _unique_path(Path(out_dir).parents,
                                        'process-steps{:02d}.txt')
             print('{filename} exists but unreadable. Writing to {newfilename}')
             filename = newfilename
@@ -165,7 +168,7 @@ def make_process_steps_file(app_name, app_description, app_version,
         fp.close()
     if debug:
         json.dumps(tree, indent=4, separators=(',', ': '))   # For testing
-    fp = open(filename, "w")
+    fp = open(Path(out_dir) / filename, "w")
     json.dump(tree, fp, sort_keys=True, indent=2)   # For real
     fp.close
 

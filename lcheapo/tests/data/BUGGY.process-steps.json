@@ -16,11 +16,11 @@
           "base_dir": "/Users/crawford/_Work/Programming/lcheapo/lcheapo/tests",
           "dryrun": false,
           "forceTime": false,
-          "in_dir": "data",
+          "in_dir": "/Users/crawford/_Work/Programming/lcheapo/lcheapo/tests/data",
           "input_files": [
             "BUGGY.raw.lch"
           ],
-          "out_dir": ".",
+          "out_dir": "/Users/crawford/_Work/Programming/lcheapo/lcheapo/tests",
           "output_files": [
             "BUGGY.fix.lch"
           ],

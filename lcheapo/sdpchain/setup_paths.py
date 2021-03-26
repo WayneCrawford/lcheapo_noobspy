@@ -20,15 +20,15 @@ def setup_paths(base_dir, in_dir, out_dir):
                  - out_dir directory containing output files
     :return in_dir, out_dir: base_dir-adjusted paths
     """
+    # print(f"{base_dir=}, {in_dir=}, {out_dir=}", flush=True)
     in_path = _choose_path(base_dir, in_dir)
     out_path = _choose_path(base_dir, out_dir)
-    assert Path(in_path).is_dir()
+    # print(f"{in_path=}, {out_path=}, {Path(in_path).is_dir()=}", flush=True)
+    assert Path(in_path).is_dir() is True
+    assert not Path(out_path).is_file()
     if Path(out_path).exists() is False:
         print(f"out_dir '{out_path}' does not exist, creating...")
-        mkdir(out_path)
-    elif Path(out_path).is_file():
-        print("out_dir '{out_path}' is a file! Will use  base dir")
-        out_path = base_dir
+        Path(out_path).mkdir(parents=True)
     return in_path, out_path
 
 

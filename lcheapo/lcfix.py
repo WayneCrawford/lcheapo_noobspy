@@ -18,17 +18,15 @@ import textwrap
 import copy         # for deepcopy of argparse dictionary
 import logging      # for logging information
 import datetime
+from pathlib import Path
 
 from .lcheapo import (LCDataBlock, LCDiskHeader, LCDirEntry)
 from . import sdpchain
+from .version import __version__
 
 # ------------------------------------
 # Global Variable Declarations
 # ------------------------------------
-version = {}
-with open(os.path.join(os.path.dirname(__file__), "version.py")) as fp:
-    exec(fp.read(), version)
-
 warnings = 0  # count # of warnings
 
 
@@ -108,15 +106,8 @@ def main():
     commandQ = queue.Queue(0)
     responseQ = queue.Queue(0)
 
-    # SET UP FILE NAMES and PATHs
-    in_filename_path, out_filename_path = sdpchain.setup_paths(args.base_dir,
-                                                               args.in_dir,
-                                                               args.out_dir)
-    in_filename_root = args.infiles[0].split('.')[0]
-    out_filename_root = in_filename_root
-
-    _make_logger(os.path.join(out_filename_path,
-                              out_filename_root + '.fix.txt'))
+    out_filename_root = args.infiles[0].split('.')[0]
+    _make_logger(os.path.join(args.out_dir, out_filename_root + '.fix.txt'))
     if args.dryrun:
         logging.info("DRY RUN: will not output a new file")
         if args.forceTime:
@@ -134,7 +125,7 @@ def main():
     numInFiles = len(args.infiles)
     firstFile = True
     for fname in args.infiles:
-        ifp1 = open(os.path.join(in_filename_path, fname), 'rb')
+        ifp1 = open(os.path.join(args.in_dir, fname), 'rb')
 
         # Find and copy the disk header
         if firstFile:    # First file, extract header
@@ -166,7 +157,7 @@ def main():
         # Adjust first block to correspond to first block with channel 0
         firstInpBlock = __findFirstMux0Block(firstInpBlock, ifp1)
 
-        outFileRoot = __makeOutFileRoot(out_filename_path, fname, numInFiles,
+        outFileRoot = __makeOutFileRoot(args.out_dir, fname, numInFiles,
                                         ifp1, firstInpBlock)
 
         # Process file
@@ -198,13 +189,14 @@ def main():
         parameters['output_files'] = [os.path.split(x)[1] for x in outFiles]
 
         sdpchain.make_process_steps_file(
+            args.in_dir,
+            args.out_dir,
             'lcfix',
             'Fix common bugs in LCHEAPO data files',
-            version['__version__'],
+            __version__,
             " ".join(sys.argv),
             startTimeStr,
             returnCode,
-            args.base_dir,
             exec_messages=msgs,
             exec_parameters=parameters)
 
@@ -236,9 +228,12 @@ def _get_options():
         epilog=epi_text,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("infiles", metavar="inFileName", nargs='+',
-                        help="Input filename(s)")
+                        help="Input filename(s).  If there are captured "
+                             "wildcards (put in '' so that they aren't "
+                             "interpreted by the shell), will expand them "
+                             "in the input directory")
     parser.add_argument("--version", action='version',
-                        version='%(prog)s {:s}'.format(version['__version__']))
+                        version='%(prog)s {:s}'.format(__version__))
     parser.add_argument("-v", "--verbose", dest="verbosity", default=0,
                         action="count",
                         help="be verbose (-v = kind of, -vv = very)")
@@ -257,6 +252,14 @@ def _get_options():
                         action="store_true",
                         help="Force timetags to be consecutive")
     args = parser.parse_args()
+    args.in_dir, args.out_dir = sdpchain.setup_paths(args.base_dir,
+                                                     args.in_dir,
+                                                     args.out_dir)
+    # Expand captured wildcards
+    print(f'{args.infiles=}')
+    args.infiles = [x.name for f in args.infiles
+                    for x in Path(args.in_dir).glob(f)]
+    print(f'expanded {args.infiles=}')
     return args
 
 
@@ -480,20 +483,19 @@ def _process_input_file(ifp1, fname, outFileRoot, lcHeader,
     printHeader = ''
     startBUG1A = -1
     prev_mux_chan = -1
-    prev_block_flag = 73
-    prev_num_samps = 166
-    prev_U1 = 3
-    prev_U2 = 166
+    # prev_block_flag = 73
+    # prev_num_samps = 166
+    # prev_U1 = 3
+    # prev_U2 = 166
     verbosity = args.verbosity
     consecIdentTimeErrors, oldDiff = 0, 0
     lcData = LCDataBlock()
 
     if not args.dryrun:
         outfilename = outFileRoot + ".fix.lch"
-        while os.path.exists(outfilename):
-            print(f"output file {outfilename} exists already! "
-                  "Adding another .fix.lch")
-            outfilename += ".fix.lch"
+        if os.path.exists(outfilename):
+            print(f"output file {outfilename} exists already! Quitting")
+            sys.exit(2)
         ofp1 = open(outfilename, 'wb')
     fname_timetears = outFileRoot + '.fix.timetears.txt'
     oftt = open(fname_timetears, 'w')

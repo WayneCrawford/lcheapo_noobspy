@@ -23,12 +23,15 @@ class TestLCHEAPOMethods(unittest.TestCase):
     def setUp(self):
         self.path = Path(inspect.getfile(
             inspect.currentframe())).resolve().parent
-        self.testing_path = self.path / "data"
+        self.test_path = self.path / "data"
 
     def assertProcessStepsFilesEqual(self, first, second, msg=None):
         with open(first, "r") as fp:
             first_tree = json.load(fp)
+            # print(first_tree)
             first_tree = self._remove_changeable_processes(first_tree)
+            # print('HAHA')
+            # print(first_tree)
         with open(second, "r") as fp:
             second_tree = json.load(fp)
             second_tree = self._remove_changeable_processes(second_tree)
@@ -72,11 +75,11 @@ class TestLCHEAPOMethods(unittest.TestCase):
         Test lcdump outputs.
         """
         # WRITEOUT OF DATA HEADERS
-        cmd = f'lcdump {Path(self.testing_path) / "BUGGY.raw.lch"} 5000 100  > temp_test.out'
+        cmd = f'lcdump {Path(self.test_path) / "BUGGY.raw.lch"} 5000 100  > temp_test.out'
         system(cmd)
         self.assertTextFilesEqual(
             'temp_test.out',
-            Path(self.testing_path) / 'BUGGY_lcdump_5000_100.txt')
+            Path(self.test_path) / 'BUGGY_lcdump_5000_100.txt')
         Path('temp_test.out').unlink()
 
         # WRITEOUT OF FILE HEADER
@@ -100,7 +103,7 @@ class TestLCHEAPOMethods(unittest.TestCase):
         assert Path(outfname).exists()
         self.assertBinFilesEqual(
             outfname,
-            Path(self.testing_path) / outfname)
+            str(Path(self.test_path) / outfname))
         Path(outfname).unlink()
 
         # Compare text files (fix.txt)
@@ -108,7 +111,7 @@ class TestLCHEAPOMethods(unittest.TestCase):
         assert Path(outfname).exists()
         self.assertTextFilesEqual(
             outfname,
-            Path(self.testing_path) / outfname)
+            str(Path(self.test_path) / outfname))
         Path(outfname).unlink()
 
         # Compare text files (process-steps.json)
@@ -118,7 +121,7 @@ class TestLCHEAPOMethods(unittest.TestCase):
         Path(outfname).rename(new_outfname)
         self.assertProcessStepsFilesEqual(
             new_outfname,
-            Path(self.testing_path) / new_outfname)
+            str(Path(self.test_path) / new_outfname))
         Path(new_outfname).unlink()
 
     def test_lcfix_bad(self):
@@ -138,7 +141,7 @@ class TestLCHEAPOMethods(unittest.TestCase):
         assert Path(outfname).exists()
         self.assertTextFilesEqual(
             outfname,
-            Path(self.testing_path) / outfname)
+            str(Path(self.test_path) / outfname))
         Path(outfname).unlink()
 
         # Compare text files (fix.timetears.txt)
@@ -146,7 +149,7 @@ class TestLCHEAPOMethods(unittest.TestCase):
         assert Path(outfname).exists()
         self.assertTextFilesEqual(
             outfname,
-            Path(self.testing_path) / outfname)
+            str(Path(self.test_path) / outfname))
         Path(outfname).unlink()
 
         # Compare process-steps files
@@ -156,7 +159,7 @@ class TestLCHEAPOMethods(unittest.TestCase):
         Path(outfname).rename(new_outfname)
         self.assertProcessStepsFilesEqual(
             new_outfname,
-            Path(self.testing_path) / new_outfname)
+            str(Path(self.test_path) / new_outfname))
         Path(new_outfname).unlink()
 
     def test_lccut(self):
@@ -174,7 +177,7 @@ class TestLCHEAPOMethods(unittest.TestCase):
         assert Path(outfname).exists()
         self.assertBinFilesEqual(
             outfname,
-            Path(self.testing_path) / outfname)
+            Path(self.test_path) / outfname)
         Path(outfname).unlink()
 
     def test_lcinfo(self):
@@ -188,7 +191,7 @@ class TestLCHEAPOMethods(unittest.TestCase):
         # Compare text files
         self.assertTextFilesEqual(
             'temp',
-            Path(self.testing_path) / 'BUGGY.info.txt')
+            str(Path(self.test_path) / 'BUGGY.info.txt'))
         Path('temp').unlink()
 
     def test_lcheader(self):
@@ -196,29 +199,31 @@ class TestLCHEAPOMethods(unittest.TestCase):
         Test lcheader
         """
         # Run the code without any questions
-        cmd = f'lcheader --no_questions'
+        cmd = 'lcheader --no_questions'
+        # cmd = f'lcheader -d {self.path} --no_questions'
+        # print(cmd + '!!!', flush=True)
         system(cmd)
 
         outfname = 'generic.header.lch'
         # Check that the appropriate file was created
-        assert Path(outfname).exists()
+        assert Path(outfname).exists(), 'generic.header.lch not found'
 
         # Compare output binary file (fix.lch)
         self.assertBinFilesEqual(outfname,
-                                 Path(self.testing_path) / outfname)
+                                 Path(self.test_path) / outfname)
         Path(outfname).unlink()
 
         # Run the code with all specified
-        cmd = f'lcheader -d MOMARL_SPOBS2_04_LSVEL -s 62.5 -c 4 -w 2019-02-04T04:53:30.024 -e 2019-06-14T04:04:29 -o LSVEL.header.lch > LSVEL.txt'
+        cmd = f'lcheader --description MOMARL_SPOBS2_04_LSVEL -s 62.5 -c 4 -w 2019-02-04T04:53:30.024 -e 2019-06-14T04:04:29 --output_file LSVEL.header.lch > LSVEL.txt'
         system(cmd)
         outfname = 'LSVEL.header.lch'
         assert Path(outfname).exists()
         self.assertBinFilesEqual(outfname,
-                                 Path(self.testing_path) / outfname)
+                                 Path(self.test_path) / outfname)
         Path(outfname).unlink()
         outfname = 'LSVEL.txt'
         self.assertTextFilesEqual(outfname,
-                                  Path(self.testing_path) / outfname)
+                                  Path(self.test_path) / outfname)
         Path(outfname).unlink()
         Path('process-steps.json').unlink()
 
