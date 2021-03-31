@@ -47,13 +47,14 @@ def sdpcat():
 
     # Save/append process information to process_steps file
     make_process_steps_file(
+        args.in_dir,
+        args.out_dir,
         'sdpcat',
         __doc__,
         __version__,
         " ".join(sys.argv),
         start_time_str,
         return_code,
-        args.base_dir,
         exec_parameters={'in_files': args.ifs,
                          'out_files': args.of,
                          'base_dir': args.base_dir,

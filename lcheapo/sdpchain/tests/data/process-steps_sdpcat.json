@@ -1,0 +1,28 @@
+{
+  "steps": [
+    {
+      "application": {
+        "description": "\nConcatenate files and create/append process-step.json file\n\nUses python standard library's shutil.copyfileobj()\n",
+        "name": "sdpcat",
+        "version": "0.72.11"
+      },
+      "execution": {
+        "commandline": "/Users/crawford/opt/anaconda3/envs/obspy/bin/sdpcat --ifs test.header.lch test.nimportequoi --of test.out",
+        "date": "2021-03-31T12:45:13",
+        "messages": [],
+        "parameters": {
+          "base_dir": ".",
+          "in_dir": "data",
+          "in_files": [
+            "test.header.lch",
+            "test.nimportequoi"
+          ],
+          "out_dir": ".",
+          "out_files": "test.out"
+        },
+        "return_code": 0,
+        "tools": []
+      }
+    }
+  ]
+}
