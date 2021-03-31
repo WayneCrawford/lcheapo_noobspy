@@ -17,6 +17,7 @@ Command-line programs:
 :lcfix: fix common bugs in an LCHEAPO file
 :lcheader: create an LCHEAPO header + directory
 :lcinfo: return basic information about an LCHEAPO file
+:sdpcat: concatenate data files
 
 Modules:
 ----------------------
