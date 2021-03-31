@@ -24,7 +24,7 @@ from . import sdpchain
 # ------------------------------------
 PROGRAM_NAME = "lcheader"
 bytes_per_block = 512
-dirs_per_block = 16
+dirEntries_per_dirBlock = 16
 blocks_per_dirEntry = 14336
 samples_per_block = 166
 accepted_sample_rates = [31.25, 62.5, 125, 250, 500, 1000, 2000, 4000]
@@ -81,12 +81,14 @@ def main():
         blocknum = h.dataStart
         d.seekBlock(fp, h.dirStart)
         while dt < params['end_time']:
-            d = __make_dirEntry(d, blocknum, dt)
+            d.blockNumber = blocknum
+            d.changeTime(dt)
             d.writeDirEntry(fp)
             dt += dir_timeoffset
             dirCount += 1
             blocknum += blocks_per_dirEntry
         h.dirCount = dirCount
+        h.dirBlock = h.dirStart + int(dirCount/dirEntries_per_dirBlock)
         h.seekHeaderPosition(fp)
         h.writeHeader(fp)
         returnCode = 0
@@ -245,9 +247,9 @@ def __generic_header():
     h.softwareVersion = '9.08a-OLD'
     h.dirStart = default_dir_startblock
     h.dataStart = default_data_startblock
-    # h.dirSize=(h.dataStart-h.dirStart-1)*dirs_per_block
+    # h.dirSize=(h.dataStart-h.dirStart-1)*dirEntries_per_dirBlock
     # Modified to work with lc2ms v1
-    h.dirSize = (h.dataStart - h.dirStart) * dirs_per_block - 1
+    h.dirSize = (h.dataStart - h.dirStart) * dirEntries_per_dirBlock - 1
     (h.slowStart, h.slowSize, h.slowBlock, h.slowByte) = (0, 0, 0, 0)
     (h.logStart, h.logSize, h.logBlock, h.logByte) = (0, 0, 0, 0)
     (h.slowDataRate, h.slowStartChannel, h.slowNumberOfChannels) = (0, 0, 0)
@@ -278,13 +280,6 @@ def __prep_dirEntry(sample_rate):
     d.flag = 0x49
     d.muxChannel = 0
     d.U1 = 0            # Unused
-    return d
-
-
-def __make_dirEntry(d, blocknum, dt):
-    """Put time in lcheapo directory entry"""
-    d.blockNumber = blocknum
-    d.changeTime(dt)
     return d
 
 

@@ -835,6 +835,7 @@ def _process_input_file(ifp1, fname, outFileRoot, lcHeader,
             logging.info("  {:d} DIRECTORY ENTRIES CREATED".format(iDir))
         if not args.dryrun:
             lcHeader.dirCount = iDir
+            lcHeader.dirBlock = lcHeader.dirStart + int(iDir/16)
             lcHeader.seekHeaderPosition(ofp1)
             lcHeader.writeHeader(ofp1)
     if __stopProcess(commandQ):

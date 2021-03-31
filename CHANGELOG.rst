@@ -96,6 +96,12 @@ length was marked as 16386 blocks when it is actually 14336
     to out_dir.  lcfix now quits if there is already a fix.lch file at
     the destination. 
     
+v0.73
+-------
+
+Repairs lcfix and lcheader bug in which dirBlock was not recalculated when
+dirCount was.
+
 todo::
 - Make output file simply replace raw.lch (or orig.lch) by fix.lch
     - Maybe reject all other suffixes, except header.lch?
