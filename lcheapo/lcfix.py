@@ -256,10 +256,10 @@ def _get_options():
                                                      args.in_dir,
                                                      args.out_dir)
     # Expand captured wildcards
-    print(f'{args.infiles=}')
+    print(f'args.infiles={args.infiles}')
     args.infiles = [x.name for f in args.infiles
                     for x in Path(args.in_dir).glob(f)]
-    print(f'expanded {args.infiles=}')
+    print(f'expanded args.infiles={args.infiles}')
     return args
 
 
