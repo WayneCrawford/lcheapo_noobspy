@@ -101,6 +101,8 @@ v0.73
 
 Repairs lcfix and lcheader bug in which dirBlock was not recalculated when
 dirCount was.
+    - post2: readheader() does not quit if unable to read software version
+      (now returns status = 0)
 
 todo::
 - Make output file simply replace raw.lch (or orig.lch) by fix.lch

@@ -29,7 +29,8 @@ setuptools.setup(
              'lcheader=lcheapo.lcheader:main'
          ]
     },
-    python_requires='>=3.6',
+    python_requires='>=3.7',
+    # Would require 3.8+ for f'{var=}' and ':='
     classifiers=(
         "Development Status :: 4 - Beta",
         "Environment :: Console",

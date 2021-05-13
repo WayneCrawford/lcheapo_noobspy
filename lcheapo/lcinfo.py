@@ -31,6 +31,8 @@ def main():
     for filename in args.infiles:
         with open(os.path.join(in_filename_path, filename),
                   'rb') as fp:
+            print('-'*60)
+            print(filename)
             _print_Info(fp)
 
 
@@ -75,7 +77,9 @@ def _print_Info(fp):
     """
     lcHeader = LCDiskHeader()
     lcHeader.seekHeaderPosition(fp)
-    lcHeader.readHeader(fp)
+    status = lcHeader.readHeader(fp)
+    if status == 0:
+        return
     sample_rate = lcHeader.realSampleRate
     n_channels = lcHeader.numberOfChannels
 

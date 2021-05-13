@@ -141,6 +141,9 @@ class LCDiskHeader (LCCommon):
         fp.seek(HEADER_START*BLOCK_SIZE, os.SEEK_SET)
 
     def readHeader(self, fp):
+        """
+        :returns: 1 if good read, 0 otherwise
+        """
         self.seekHeaderPosition(fp)
         "Read an LCheapo disk header (packed big endian format)."
         (self.writeBlock, self.writeByte, self.readBlock, self.readByte) =\
@@ -155,16 +158,19 @@ class LCDiskHeader (LCCommon):
             struct.unpack('>LH', fp.read(6))
         (self.softwareVersion, self.description) =\
             struct.unpack('>10s80s', fp.read(90))
+        # Python strings do not terminate on '\0', therefore, do this manually.
+        self.softwareVersion = _str_from_cstr(self.softwareVersion)
+        if self.softwareVersion is None:
+            print('Could not read softwareVersion, file may not have a header')
+            return 0
+        self.description = _str_from_cstr(self.description)
+
         (self.sampleRate, self.startChannel, self.numberOfChannels) =\
             struct.unpack('>3H', fp.read(6))
         (self.slowDataRate, self.slowStartChannel,
          self.slowNumberOfChannels) = struct.unpack('>3H', fp.read(6))
         (self.dataType, self.diskSize, self.ramSize, self.numberOfWindows) =\
             struct.unpack('>4H', fp.read(8))
-
-        # Python strings do not terminate on '\0', therefore, do this manually.
-        self.softwareVersion = _str_from_cstr(self.softwareVersion)
-        self.description = _str_from_cstr(self.description)
 
         # Additions which cannot be written back out
         self.realSampleRate = self.getRealSampleRate(self.sampleRate)
@@ -174,6 +180,7 @@ class LCDiskHeader (LCCommon):
                                    "Compressed (16-Bit)",
                                    "Uncompressed (24-Bit)",
                                    "Compressed (24-Bit)")[self.dataType]
+        return 1
 
     def writeHeader(self, fp):
         "Write an LCheapo disk header (packed big endian format)."
@@ -419,7 +426,10 @@ def _str_from_cstr(cstr):
     """
     Convert a C string to Python
     """
-    return cstr.decode("utf-8").split('\0')[0]
+    try:
+        return cstr.decode("utf-8").split('\0')[0]
+    except Exception:
+        return None
 
 
 def _cstr_from_str(str):
