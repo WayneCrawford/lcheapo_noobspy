@@ -22,6 +22,7 @@ setuptools.setup(
     entry_points={
          'console_scripts': [
              'sdpcat=lcheapo.sdpchain:sdpcat',
+             'sdpstep=lcheapo.sdpchain:sdpstep',
              'lcfix=lcheapo.lcfix:main',
              'lcdump=lcheapo.lcdump:main',
              'lccut=lcheapo.lccut:main',
