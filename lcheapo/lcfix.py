@@ -15,9 +15,8 @@ import argparse
 import queue
 import os
 import textwrap
-import copy         # for deepcopy of argparse dictionary
 import logging      # for logging information
-import datetime
+from datetime import timedelta
 from pathlib import Path
 
 from .lcheapo import (LCDataBlock, LCDiskHeader, LCDirEntry)
@@ -98,15 +97,13 @@ def main():
     msgs = []
     outFiles = []
     # lcData = LCDataBlock()
-    startTimeStr = datetime.datetime.strftime(datetime.datetime.utcnow(),
-                                              '%Y-%m-%dT%H:%M:%S')
 
     # GET ARGUMENTS
     args = _get_options()
     commandQ = queue.Queue(0)
     responseQ = queue.Queue(0)
 
-    out_filename_root = args.infiles[0].split('.')[0]
+    out_filename_root = args.input_files[0].split('.')[0]
     _make_logger(os.path.join(args.out_dir, out_filename_root + '.fix.txt'))
     if args.dryrun:
         logging.info("DRY RUN: will not output a new file")
@@ -115,16 +112,16 @@ def main():
             args.forceTime = False
 
     # IF THERE IS A FILE WITH '.header.', PUT IT AT THE BEGINNING OF THE LIST
-    for f in args.infiles:
+    for f in args.input_files:
         if '.header.' in f:
-            args.infiles.remove(f)
-            args.infiles.insert(0, f)
+            args.input_files.remove(f)
+            args.input_files.insert(0, f)
             break
 
     # LOOP THROUGH INPUT FILES
-    numInFiles = len(args.infiles)
+    numInFiles = len(args.input_files)
     firstFile = True
-    for fname in args.infiles:
+    for fname in args.input_files:
         ifp1 = open(os.path.join(args.in_dir, fname), 'rb')
 
         # Find and copy the disk header
@@ -176,31 +173,20 @@ def main():
         # END OF INPUT FILES LOOP
     _print_final_message(args.forceTime, counters, n_files)
 
-    returnCode = 0
+    exit_status = 0
     if not args.dryrun:
-        # if counters['iTT']:
         if counters.time_tear:
-            returnCode = -1
+            exit_status = -1
         elif not warnings == 0:
-            returnCode = 2
-        parameters = copy.deepcopy(vars(args))
-        del parameters['infiles']
-        parameters['input_files'] = args.infiles
-        parameters['output_files'] = [os.path.split(x)[1] for x in outFiles]
+            exit_status = 2
 
-        sdpchain.make_process_steps_file(
-            args.in_dir,
-            args.out_dir,
-            'lcfix',
-            'Fix common bugs in LCHEAPO data files',
-            __version__,
-            " ".join(sys.argv),
-            startTimeStr,
-            returnCode,
-            exec_messages=msgs,
-            exec_parameters=parameters)
+        global process_step
+        process_step.messages = msgs
+        process_step.exit_status = exit_status
+        process_step.output_files = [Path(x).name for x in outFiles]
+        process_step.write(args.in_dir, args.out_dir)
 
-    sys.exit(returnCode)
+    sys.exit(exit_status)
 
 
 def _get_options():
@@ -227,7 +213,7 @@ def _get_options():
         description=__doc__,
         epilog=epi_text,
         formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("infiles", metavar="inFileName", nargs='+',
+    parser.add_argument("input_files", metavar="inFileName", nargs='+',
                         help="Input filename(s).  If there are captured "
                              "wildcards (put in '' so that they aren't "
                              "interpreted by the shell), will expand them "
@@ -252,14 +238,19 @@ def _get_options():
                         action="store_true",
                         help="Force timetags to be consecutive")
     args = parser.parse_args()
-    args.in_dir, args.out_dir = sdpchain.setup_paths(args.base_dir,
-                                                     args.in_dir,
-                                                     args.out_dir)
+    global process_step
+    process_step = sdpchain.ProcessStep(
+        'lcfix',
+        " ".join(sys.argv),
+        app_description='Fix common bugs in LCHEAPO data files',
+        app_version=__version__,
+        parameters=args)
+    args.in_dir, args.out_dir = sdpchain.setup_paths(args)
     # Expand captured wildcards
-    print(f'args.infiles={args.infiles}')
-    args.infiles = [x.name for f in args.infiles
-                    for x in Path(args.in_dir).glob(f)]
-    print(f'expanded args.infiles={args.infiles}')
+    # print(f'{args.input_files=}')
+    args.input_files = [x.name for f in args.input_files
+                        for x in Path(args.in_dir).glob(f)]
+    # print(f'expanded {args.input_files=}')
     return args
 
 
@@ -281,8 +272,8 @@ def getTimeDelta(seconds=0.):
     int_secs = int(seconds)
     seconds -= int_secs
     msec = int(seconds * 1000)
-    return datetime.timedelta(days=days, hours=hours, minutes=minutes,
-                              seconds=seconds, milliseconds=msec)
+    return timedelta(days=days, hours=hours, minutes=minutes,
+                     seconds=seconds, milliseconds=msec)
 
 
 def _to_msec(tm):
@@ -510,7 +501,7 @@ def _process_input_file(ifp1, fname, outFileRoot, lcHeader,
         return
 
     blockTime = int((166 * (1.0 / lcHeader.realSampleRate)) * 1000)
-    blockTimeDelta = datetime.timedelta(0, 0, 0, blockTime, 0, 0)
+    blockTimeDelta = t = timedelta(0, 0, 0, blockTime, 0, 0)
 
     # -----------------------------
     # Grab the first time entries (one for each channel) and adjust them

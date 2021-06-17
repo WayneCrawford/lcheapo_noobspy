@@ -1,34 +1,36 @@
 {
-  "steps": [
-    {
-      "application": {
-        "description": "Fix common bugs in LCHEAPO data files",
-        "name": "lcfix",
-        "version": "0.72.1.2"
-      },
-      "execution": {
-        "commandline": "/Users/crawford/anaconda3/envs/lcheapo/bin/lcfix -d /Users/crawford/_Work/Programming/lcheapo/lcheapo/tests -i data BUGGY.raw.lch",
-        "date": "2020-01-27T11:42:40",
-        "messages": [
-          "  BUGGY.raw.lch=>BUGGY.fix.lch: Finished at block 9999 (52 BUG1s, 0 BUG2s, 0 BUG3s, 0 Time Tears, 0 unexpected header values)"
-        ],
-        "parameters": {
-          "base_dir": "/Users/crawford/_Work/Programming/lcheapo/lcheapo/tests",
-          "dryrun": false,
-          "forceTime": false,
-          "in_dir": "/Users/crawford/_Work/Programming/lcheapo/lcheapo/tests/data",
-          "input_files": [
-            "BUGGY.raw.lch"
-          ],
-          "out_dir": "/Users/crawford/_Work/Programming/lcheapo/lcheapo/tests",
-          "output_files": [
-            "BUGGY.fix.lch"
-          ],
-          "verbosity": 0
-        },
-        "return_code": 0,
-        "tools": []
-      }
-    }
-  ]
+    "steps": [
+        {
+            "application": {
+                "description": "Fix common bugs in LCHEAPO data files",
+                "name": "lcfix",
+                "version": "0.73.post2"
+            },
+            "execution": {
+                "command_line": "/Users/crawford/opt/anaconda3/envs/obspy/bin/lcfix -d /Users/crawford/_Work/Programming/lcheapo/lcheapo/tests -i data BUGGY.raw.lch",
+                "date": "2021-06-16T20:44:08",
+                "exit_status": 0,
+                "messages": [
+                    "  BUGGY.raw.lch=>BUGGY.fix.lch: Finished at block 9999 (52 BUG1s, 0 BUG2s, 0 BUG3s, 0 Time Tears, 0 unexpected header values)"
+                ],
+                "parameters": {
+                    "directory_paths": {
+                        "base": "/Users/crawford/_Work/Programming/lcheapo/lcheapo/tests",
+                        "input": "data",
+                        "output": "."
+                    },
+                    "dryrun": false,
+                    "forceTime": false,
+                    "input_files": [
+                        "BUGGY.raw.lch"
+                    ],
+                    "output_files": [
+                        "BUGGY.fix.lch"
+                    ],
+                    "verbosity": 0
+                },
+                "tools": []
+            }
+        }
+    ]
 }

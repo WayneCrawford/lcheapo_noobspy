@@ -1,0 +1,26 @@
+{
+    "steps": [
+        {
+            "application": {
+                "description": "crappy app",
+                "name": "my_app",
+                "version": "0.0"
+            },
+            "execution": {
+                "command_line": "my_app -a hehe -b hoho",
+                "date": "2019-06-05T12:52:56",
+                "messages": [
+                    "That hurts!",
+                    "Stop!",
+                    "ouch!"
+                ],
+                "parameters": {
+                    "a": "hehe",
+                    "b": "hoho"
+                },
+                "exit_status": 0,
+                "tools": []
+            }
+        }
+    ]
+}

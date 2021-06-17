@@ -1,0 +1,56 @@
+{
+   "steps" : [
+      {
+         "application" : {
+            "name" : "msdrift",
+            "version" : "2.0",
+            "description" : "Applies linear clock drift correction to miniSEED data.\n"
+         },
+         "execution" : {
+            "date" : "2018-10-19T17:26:38",
+            "comment" : "commentaire d'execution",
+            "messages" : [
+                "Input SEED file checked : 2_miniseed_basic/Z3.A401A.00.BDH.2017.344.150111.BBOBS1_02.mseed",
+                "MSEED file processed : 2_miniseed_basic/Z3.A401A.00.BDH.2017.344.150111.BBOBS1_02.mseed",
+                "MSEED file corrected : 3_minseed_corrected/Z3.A401A.00.BDH.2017.344.150111.BBOBS1_02_driftcorr.mseed"
+            ],
+            "command_line" : "msdrift Z3.A401A.00.BDH.2017.344.150111.BBOBS1_02.mseed -d /Volumes/PARC_OBS_Wayne/DATA_EXPERIMENTS/2017-18.AlpArray/2017-18.AlpArray/A401A -i 2_miniseed_basic -o 3_minseed_corrected -m %E.%S.00.%C.%Y.%D.%1_%2.mseed:%E.%S.00.%C.%Y.%D.%1_%2_driftcorr.mseed -s 2017-06-21T06:36:00;0 -e 2018-02-16T01:44:00.1461;2018-02-16T01:44:00.00 -c comment.txt -p /Users/crawford/_Work/Parc_OBS/3_Development/Data_and_Metadata/SDPCHAIN/Software_IPGP-INSU_v20170222_modWayne/BUILD/SDPCHAIN/MSDRIFT/config/msdrift.properties",
+            "exit_status" : 0,
+            "parameters" : {
+               "directory_paths" : {
+                  "base" : "/Volumes/PARC_OBS_Wayne/DATA_EXPERIMENTS/2017-18.AlpArray/2017-18.AlpArray/A401A",
+                  "input" : "2_miniseed_basic",
+                  "output" : "3_minseed_corrected"
+               },
+               "input_files" : [
+                  "Z3.A401A.00.BDH.2017.344.150111.BBOBS1_02.mseed"
+               ],
+               "filename_models" : {
+                  "input_name" : "%E.%S.00.%C.%Y.%D.%1_%2.mseed",
+                  "output_name" : "%E.%S.00.%C.%Y.%D.%1_%2_driftcorr.mseed"
+               },
+               "start_dates" : {
+                  "gps" : "2017-06-21T06:36:00",
+                  "instrument" : "0"
+               },
+               "end_dates" : {
+                  "gps" : "2018-02-16T01:44:00.1461",
+                  "instrument" : "2018-02-16T01:44:00.00"
+               },
+               "quality_indicator" : "X"
+            },
+            "tools" : [
+               {
+                  "version_string" : "qedit ?.?",
+                  "command_line" : "qedit Z3.A401A.00.BDH.2017.344.150111.BBOBS1_02.mseed driftcorr_1539962798227.mseed",
+                  "exit_status" : 0,
+                  "input_file" : "/Volumes/PARC_OBS_Wayne/DATA_EXPERIMENTS/2017-18.AlpArray/2017-18.AlpArray/A401A/2_miniseed_basic/Z3.A401A.00.BDH.2017.344.150111.BBOBS1_02.mseed",
+                  "output_files" : [
+                     "/Volumes/PARC_OBS_Wayne/DATA_EXPERIMENTS/2017-18.AlpArray/2017-18.AlpArray/A401A/3_minseed_corrected/Z3.A401A.00.BDH.2017.344.150111.BBOBS1_02_driftcorr.mseed"
+                  ]
+               }
+            ]
+         }
+      }
+   ]
+}

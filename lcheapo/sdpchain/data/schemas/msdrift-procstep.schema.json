@@ -1,0 +1,150 @@
+{
+    "parameters": {
+        "id": "#/parameters",
+        "type": "object",
+        "minProperties": 6,
+        "maxProperties": 6,
+        "title": "The parameters schema",
+        "description": "An explanation about the purpose of this instance.",
+        "required": [
+            "directory_paths",
+            "input_files",
+            "filename_models",
+            "start_synchronization",
+            "end_synchronization",
+            "quality_indicator"
+        ],
+        "additionalProperties": false,
+        "properties": {
+            "directory_paths": {
+                "id": "#/parameters/properties/directory_paths",
+                "type": "object",
+                "minProperties": 3,
+                "maxProperties": 3,
+                "title": "The directory_paths schema",
+                "description": "An explanation about the purpose of this instance.",
+                "required": [ "base", "input", "output" ],
+                "additionalProperties": false,
+                "properties": {
+                    "base": {
+                        "id": "#/parameters/properties/directory_paths/properties/base",
+                        "$ref": "#/definitions/file_pathname"
+                    },
+                    "input": {
+                        "id": "#/parameters/properties/directory_paths/properties/input",
+                        "$ref": "#/definitions/file_pathname"
+                    },
+                    "output": {
+                        "id": "#/parameters/properties/directory_paths/properties/output",
+                        "$ref": "#/definitions/file_pathname"
+                    }
+                }
+            },
+            "input_files": {
+                "id": "#/parameters/properties/input_files",
+                "type": "array",
+                "uniqueItems": false,
+                "minItems": 1,
+                "minContains": 1,
+                "title": "The input_files schema",
+                "description": "An explanation about the purpose of this instance.",
+                "additionalItems": true,
+                "items": {
+                    "id": "#/parameters/properties/input_files/items",
+                    "$ref": "#/definitions/file_pathname"
+                }
+            },
+            "filename_models": {
+                "id": "#/parameters/properties/filename_models",
+                "type": "object",
+                "minProperties": 2,
+                "maxProperties": 2,
+                "title": "The filename_models schema",
+                "description": "An explanation about the purpose of this instance.",
+                "required": [ "input_name", "output_name" ],
+                "additionalProperties": false,
+                "properties": {
+                    "input_name": {
+                        "id": "#/parameters/properties/filename_models/properties/input_name",
+                        "$ref": "#/definitions/filename_model"
+                    },
+                    "output_name": {
+                        "id": "#/parameters/properties/filename_models/properties/output_name",
+                        "$ref": "#/definitions/filename_model"
+                    }
+                }
+            },
+            "start_synchronization": {
+                "id": "#/parameters/properties/start_synchronization",
+                "type": "object",
+                "minProperties": 2,
+                "maxProperties": 2,
+                "title": "The start_synchronization schema",
+                "description": "An explanation about the purpose of this instance.",
+                "required": [ "reference_datetime", "instrument_datetime" ],
+                "additionalProperties": false,
+                "properties": {
+                    "reference_datetime": {
+                        "id": "#/parameters/properties/start_synchronization/properties/reference_datetime",
+                        "$ref": "#/definitions/synchronization_datetime"
+                    },
+                    "instrument_datetime": {
+                        "id": "#/parameters/properties/start_synchronization/properties/instrument_datetime",
+                        "$ref": "#/definitions/synchronization_datetime"
+                    }
+                }
+            },
+            "end_synchronization": {
+                "id": "#/parameters/properties/end_synchronization",
+                "type": "object",
+                "minProperties": 2,
+                "maxProperties": 2,
+                "title": "The end_synchronization schema",
+                "description": "An explanation about the purpose of this instance.",
+                "required": [ "reference_datetime", "instrument_datetime" ],
+                "additionalProperties": false,
+                "properties": {
+                    "reference_datetime": {
+                        "id": "#/parameters/properties/end_synchronization/properties/reference_datetime",
+                        "$ref": "#/definitions/synchronization_datetime"
+                    },
+                    "instrument_datetime": {
+                        "id": "#/parameters/properties/end_synchronization/properties/instrument_datetime",
+                        "$ref": "#/definitions/synchronization_datetime"
+                    }
+                }
+            },
+            "quality_indicator": {
+                "id": "#/parameters/properties/quality_indicator",
+                "$ref": "#/definitions/quality_indicator"
+            }
+        }
+    },
+    "definitions": {
+        "file_pathname": {
+            "type": "string",
+            "minLength": 1,
+            "title": "file path name",
+            "description": "An explanation about the purpose of this instance."
+        },
+        "filename_model": {
+            "type": "string",
+            "minLength": 1,
+            "title": "The filename_model Schema",
+            "description": "An explanation about the purpose of this instance."
+        },
+        "synchronization_datetime": {
+            "type": "string",
+            "minLength": 0,
+            "title": "The synchronization_datetime schema",
+            "description": "An explanation about the purpose of this instance."
+        },
+        "quality_indicator": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1,
+            "title": "The quality_indicator schema",
+            "description": "An explanation about the purpose of this instance."
+        }
+    }
+}

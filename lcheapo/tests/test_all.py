@@ -35,7 +35,8 @@ class TestLCHEAPOMethods(unittest.TestCase):
         with open(second, "r") as fp:
             second_tree = json.load(fp)
             second_tree = self._remove_changeable_processes(second_tree)
-        assert first_tree == second_tree
+        self.maxDiff = None
+        self.assertEqual(first_tree, second_tree)
 
     def _remove_changeable_processes(self, tree):
         for step in tree["steps"]:
@@ -91,9 +92,9 @@ class TestLCHEAPOMethods(unittest.TestCase):
         Test lcfix on a typical (buggy) file
         """
         # Run the code
-        cmd = f'lcfix -d {self.path} -i data BUGGY.raw.lch > temp'
+        cmd = f'lcfix -d {self.path} -i data BUGGY.raw.lch > temp_buggy'
         system(cmd)
-        Path('temp').unlink()
+        Path('temp_buggy').unlink()
 
         # Check that the appropriate files were created
         assert not Path('BUGGY.fix.timetears.txt').exists()
@@ -129,9 +130,9 @@ class TestLCHEAPOMethods(unittest.TestCase):
         Test lcfix on a bad (full of time tears) file
         """
         # Run the code
-        cmd = f'lcfix -d {self.path} -i data BAD.bad.lch > temp'
+        cmd = f'lcfix -d {self.path} -i data BAD.bad.lch > temp_bad'
         system(cmd)
-        Path('temp').unlink()
+        Path('temp_bad').unlink()
 
         # Confirm that no lch file was created
         assert not Path('BAD.fix.lch').exists()
@@ -167,7 +168,7 @@ class TestLCHEAPOMethods(unittest.TestCase):
         Test lccut
         """
         # Run the code
-        cmd = f'lccut -d {self.path} -i data BUGGY.fix.lch --start 5000 --end 5099 > temp'
+        cmd = f'lccut -i data BUGGY.fix.lch --start 5000 --end 5099 > temp'
         system(cmd)
         Path('temp').unlink()
         Path('process-steps.json').unlink()
@@ -212,6 +213,7 @@ class TestLCHEAPOMethods(unittest.TestCase):
         self.assertBinFilesEqual(outfname,
                                  Path(self.test_path) / outfname)
         Path(outfname).unlink()
+        Path('process-steps.json').unlink()
 
         # Run the code with all specified
         cmd = f'lcheader --description MOMARL_SPOBS2_04_LSVEL -s 62.5 -c 4 -w 2019-02-04T04:53:30.024 -e 2019-06-14T04:04:29 --output_file LSVEL.header.lch > LSVEL.txt'

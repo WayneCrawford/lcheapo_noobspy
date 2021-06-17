@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function,
 from future.builtins import *  # NOQA @UnusedWildImport
 
 import argparse
+import copy
 # import os
 from datetime import datetime as dt
 import sys
@@ -25,7 +26,6 @@ MAX_BLOCK_READ = 2048   # max number of blocks to read at once
 
 
 def main():
-    start_time_str = dt.strftime(dt.utcnow(), '%Y-%m-%dT%H:%M:%S')
     return_code = 0
     exec_messages = []
 
@@ -33,12 +33,12 @@ def main():
     args = getOptions()
 
     # Verify output filename
-    if not args.out_fname:
+    if not args.output_file:
         # Create output filename
         base = Path(args.in_fname).stem
         ext = Path(args.in_fname).suffix
-        args.out_fname = f'{base}_{args.start:d}_{args.end:d}{ext}'
-    out_path = Path(args.out_dir) / args.out_fname
+        args.output_file = f'{base}_{args.start:d}_{args.end:d}{ext}'
+    out_path = Path(args.out_dir) / args.output_file
     if out_path.exists():
         print('output file {out_path} exists already, quitting...')
         sys.exit(2)
@@ -67,7 +67,7 @@ def main():
             exec_messages.append(msg)
         else:
             msg = 'Writing blocks {:d}-{:d} to {}'.format(
-                args.start, args.end, args.out_fname)
+                args.start, args.end, args.output_file)
             print(msg)
             exec_messages.append(msg)
             with open(out_path, 'wb') as of:
@@ -83,17 +83,11 @@ def main():
                         of.write(fp.read(MAX_BLOCK_READ * BLOCK_SIZE))
                         start_block += MAX_BLOCK_READ
     # Save/append process information to process_steps file
-    sdpchain.make_process_steps_file(
-        args.in_dir,
-        args.out_dir,
-        'lccut',
-        __doc__,
-        __version__,
-        " ".join(sys.argv),
-        start_time_str,
-        return_code,
-        exec_messages=exec_messages,
-        exec_parameters='')
+    global process_step
+    process_step.messages = exec_messages
+    process_step.out_file = args.output_file
+    process_step.exit_code = return_code
+    process_step.write(args.in_dir, args.out_dir)
 
 
 def getOptions():
@@ -104,7 +98,7 @@ def getOptions():
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("in_fname", help="Input filename")
-    parser.add_argument("--of", dest="out_fname", default="",
+    parser.add_argument("--of", dest="output_file", default="",
                         help="""
                         Output filename.  If not provided, writes to
                         {root}_{start}_{end}.{ext}, where {ext} is the last
@@ -122,10 +116,14 @@ def getOptions():
     parser.add_argument("-o", "--output", dest="out_dir", default='.',
                         help="path for output files (abs, or rel to base)")
     args = parser.parse_args()
-
-    args.in_dir, args.out_dir = sdpchain.setup_paths(args.base_dir,
-                                                     args.in_dir,
-                                                     args.out_dir)
+    global process_step
+    process_step = sdpchain.ProcessStep(
+        'lccut',
+        " ".join(sys.argv),
+        app_description=__doc__,
+        app_version=__version__,
+        parameters=args)
+    args.in_dir, args.out_dir = sdpchain.setup_paths(args)
     return args
 
 

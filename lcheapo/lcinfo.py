@@ -24,9 +24,7 @@ def main():
 
     # GET ARGUMENTS
     args = getOptions()
-    in_filename_path, out_filename_path = sdpchain.setup_paths(args.base_dir,
-                                                               args.in_dir,
-                                                               args.out_dir)
+    in_filename_path, out_filename_path = sdpchain.setup_paths(args)
 
     for filename in args.infiles:
         with open(os.path.join(in_filename_path, filename),

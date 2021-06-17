@@ -103,6 +103,9 @@
                                         "$ref": "mscat-procstep.schema.json#/parameters"
                                     },
                                     {
+                                        "$ref": "msdrift-procstep.schema.json#/parameters"
+                                    },
+                                    {
                                         "type": "object",
                                         "additionalProperties": true
                                     }

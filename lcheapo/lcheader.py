@@ -8,6 +8,7 @@ Create/modify an LCHEAPO data file header
 # from future.builtins import *  # NOQA @UnusedWildImport
 
 import sys
+import copy
 # import os
 import math as m
 import argparse
@@ -91,21 +92,14 @@ def main():
         h.dirBlock = h.dirStart + int(dirCount/dirEntries_per_dirBlock)
         h.seekHeaderPosition(fp)
         h.writeHeader(fp)
-        returnCode = 0
-        params['wake_time'] = params['wake_time'].isoformat()
-        params['end_time'] = params['end_time'].isoformat()
-
-        sdpchain.make_process_steps_file(
-            opts.in_dir,
-            opts.out_dir,
-            'lcheader',
-            'Create an LCHEAPO header and directory',
-            __version__,
-            " ".join(sys.argv),
-            datetime.strftime(datetime.utcnow(),  '%Y-%m-%dT%H:%M:%S'),
-            returnCode,
-            exec_parameters=params)
-    sys.exit(returnCode)
+        
+    global process_step
+    process_step.parameters['wake_time'] = params['wake_time'].isoformat()
+    process_step.parameters['end_time'] = params['end_time'].isoformat()
+    process_step.output_file = params['output_filename']
+    process_step.exit_status = 0
+    process_step.write(opts.in_dir, opts.out_dir) 
+    sys.exit(0)
 
 
 def __getOptions():
@@ -148,10 +142,15 @@ def __getOptions():
     parser.add_argument("-o", "--output", dest="out_dir", default='.',
                         help="path for output files (abs, or rel to base)")
     args = parser.parse_args()
+    global process_step
+    process_step = sdpchain.ProcessStep(
+        'lcheader',
+        " ".join(sys.argv),
+        app_description='Create an LCHEAPO header and directory',
+        app_version=__version__,
+        parameters=args)
 
-    args.in_dir, args.out_dir = sdpchain.setup_paths(args.base_dir,
-                                                     args.in_dir,
-                                                     args.out_dir)
+    args.in_dir, args.out_dir = sdpchain.setup_paths(args)
     args = parser.parse_args()
 
     # Get the filename (the arguments)

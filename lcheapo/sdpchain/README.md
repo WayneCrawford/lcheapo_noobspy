@@ -6,29 +6,33 @@ Seismology Data Preparation Module
 Routines and classes providing a consistent interface for Python programs using
 the SDPCHAIN protocol, which includes:
 
-- Creation or appending to a process-steps.json file at each step
-- command-line arguments -d (base directory) -i (onput directory) and -o
-  (output directory), plus optional arguments (infile) or (infiles), -of
-  (outfile) or -ofs (outfiles), -f (force output file)
-  
-if the input directory has a process-steps file, it is copied to the base
-directory and appended to.
+- Create or append to a process-steps.json file at each step
+    - the process-steps file is read from the input directory and written
+      to the output directory.  If both directories are the same the new step
+      is appended to the existing file
+- command-line arguments:
+    - -d (base_dir)
+    - -i (in_dir), can be relative to base directory
+    - -o (out_dir), can be relative to base directory
+    - optional (input_file) or (input_files), will have input directory pre-pended
+    - optional -of (output_file) or -ofs (output_files), will have output dir pre-pended
+    - optional -f, forces writing of output file if it already exists
 
+- For now, these parameters must have exactly the above names in the files that
+  use SDPCHAIN, so that setup_paths and ProcessStep process them correctly.
+  The new ArgParser subclass should eliminate this need, but pre-populating
+  the argparser with base_dir, in_dir and out_dir, as well as optionally 
+  input_file or input_files, output_file or output_files, and/or -f
+  
 Classes
 ---------------------
 
 :ProcessSteps: object to hold information for a process-steps file
-:ArgParser: argparse:argparser instance prefilled with the SDPCHAIN command-
-            line arguments.  Once parsed, the optional infile, infiles, outfile
-            and outfiles attributes are adusted for their relation to the
-            base and input/output directories and any process-steps.json file
-            in the input directory is copied to the base directory (quits
-            if there is already one there)
 
 Command-line Routines
 ---------------------
 
-These routines allow one to perform common functions while following the
+These routines perform common functions while following the
 SDPCHAIN rules (process-steps file, -i, -o, -d)
-:sdp-process: run a standard command-line program 
+:sdpstep: run a standard command-line program 
 :sdpcat: concatenate binary files

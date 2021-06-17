@@ -3,31 +3,38 @@
 """
 SDPCHAIN compatibility functions
 """
-from os import mkdir
 from pathlib import Path
 
 
-def setup_paths(base_dir, in_dir, out_dir):
+def setup_paths(args, verbose=True):
     """
     Set up paths using SDPCHAIN standards
 
-    :parm base_dir: base directory (for process-steps.json file and as
-                    a basis for in_dir and out_dir)
-    :param in_dir: directory for input files.  absolute path or relative
-                   to base_dir
-    :param out_dir: directory for ourput files.  absolute path or relative
-                   to base_dir
-                 - out_dir directory containing output files
+    param args: a NameSpace object (usually created by argparser) with the
+                attributes base_dir, in_dir and out_dir
     :return in_dir, out_dir: base_dir-adjusted paths
+    
+    The rules are:
+        - base_dir is the root for in_dir and out_dir)
+        - in_dir is the directory for input files.  An absolute path or relative
+                   to base_dir
+        - out_dir is the directory to output to.
+        - in_dir and out_dir are absolute paths or relative to base_dir
     """
-    # print(f"{base_dir=}, {in_dir=}, {out_dir=}", flush=True)
-    in_path = _choose_path(base_dir, in_dir)
-    out_path = _choose_path(base_dir, out_dir)
+    if not hasattr(args, "base_dir"):
+        raise NameError('args has no base_dir attribute')
+    if not hasattr(args, "in_dir"):
+        raise NameError('args has no in_dir attribute')
+    if not hasattr(args, "out_dir"):
+        raise NameError('args has no out_dir attribute')
+    in_path = _choose_path(args.base_dir, args.in_dir)
+    out_path = _choose_path(args.base_dir, args.out_dir)
     # print(f"{in_path=}, {out_path=}, {Path(in_path).is_dir()=}", flush=True)
     assert Path(in_path).is_dir() is True
     assert not Path(out_path).is_file()
     if Path(out_path).exists() is False:
-        print(f"out_dir '{out_path}' does not exist, creating...")
+        if verbose:
+            print(f"out_dir '{out_path}' does not exist, creating...")
         Path(out_path).mkdir(parents=True)
     return in_path, out_path
 

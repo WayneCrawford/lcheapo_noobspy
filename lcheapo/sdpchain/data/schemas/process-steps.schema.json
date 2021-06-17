@@ -1,0 +1,114 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"title": "Process-steps",
+	"description": "Processing steps for conversion of seismological data",
+	"type": "object",
+	"required": [ "steps" ],
+	"properties": {
+	    "steps" :         {"$ref" : "#/definitions/steps"}
+	},
+	"additionalProperties" : false,
+	"definitions" : {
+		"steps": {
+			"type": "array",
+			"description" : "A list of processing steps",
+            "minItems": 1,
+            "items" : { "$ref" : "#/definitions/step" }
+		},
+		"step": {
+			"type": "object",
+			"description" : "A single processing step",
+			"required": [
+		        "application",
+		        "execution"
+			],
+			"properties": {
+                "application": {"$ref" : "#/definitions/application"},
+                "execution":   {"$ref" : "#/definitions/execution"}
+			},
+		    "additionalProperties" : false
+		},
+	    "application" : {
+            "description": "Information about the application used",
+            "type": "object",
+            "required" : [
+                "name"
+            ],
+            "properties" : {
+                "name":         {"type" : "string", "minLength" : 1 },
+                "version":      {"$ref" : "#/definitions/string_or_null"},
+                "description":  {"type" : "string", "minLength" : 1 },
+                "comment":      {"type" : "string", "minLength" : 1 }
+            },
+		    "additionalProperties" : false
+        },
+        "string_or_null": {
+            "anyOf": [
+                {"type" : "string", "minLength" : 1 },
+                {"type" : "null" }
+            ]
+        },
+	    "execution" : {
+            "description": "Information about the application's execution",
+            "type": "object",
+            "required" : [
+                "commandline",
+                "date",
+                "parameters",
+                "tools",
+                "return_code"
+            ],
+            "properties" : {
+                "commandline":  {"type" : "string", "minLength" : 1 },
+                "date":         {"$ref" : "#/definitions/date" },
+                "messages":     {"$ref" : "#/definitions/list_of_strings"},
+                "parameters":   {"$ref" : "#/definitions/parameters" },
+                "tools":        {"$ref" : "#/definitions/tools" },
+                "return_code":  {"type" : "integer"},
+                "comment":      {"type" : "string", "minLength" : 0}
+            },
+		    "additionalProperties" : false
+        },
+	    "date" : {
+                "type": "string",
+                "description": "Date-time in ISO format",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]*|)$"
+        },
+ 	    "parameters" : {
+            "description": "Parameters passed to the application (specific to the application)",
+            "type": "object",
+            "properties" : {
+                "input_files":  {"$ref" : "#/definitions/list_of_strings" },
+                "input_file":   {"type" : "string", "minLength" : 1 },
+                "output_files": {"$ref" : "#/definitions/list_of_strings" },
+                "output_file":  {"type" : "string", "minLength" : 1 }
+            },
+            "patternProperties": {"^[A-Za-z0-9_-]+$": {}},
+            "additionalProperties": false
+        },
+	    "list_of_strings" : {
+            "description": "A list of strings",
+            "type": "array",
+            "minItems": 1,
+            "items" : { "type" : "string", "minLength" : 1 }
+        },
+	    "tools" : {
+            "description": "List of programs used by the main program",
+            "type": "array",
+            "minItems": 0,
+            "items" : {"$ref" : "#/definitions/tool"}
+        },
+	    "tool" : {
+            "description": "A program used by the main program",
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+                "name":                 {"type" : "string"},
+                "version":              {"type" : "string"},
+                "command_parameters":   {"type" : "string"},
+                "exit_status":          {"type" : "integer"}
+            },
+            "additionalProperties": true
+        }
+	}
+}

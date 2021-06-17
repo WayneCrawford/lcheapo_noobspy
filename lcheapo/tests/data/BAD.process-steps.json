@@ -1,34 +1,36 @@
 {
-  "steps": [
-    {
-      "application": {
-        "description": "Fix common bugs in LCHEAPO data files",
-        "name": "lcfix",
-        "version": "0.72.1.2"
-      },
-      "execution": {
-        "commandline": "/Users/crawford/anaconda3/envs/lcheapo/bin/lcfix -d /Users/crawford/_Work/Programming/lcheapo/lcheapo/tests -i data BAD.bad.lch",
-        "date": "2020-01-27T11:42:40",
-        "messages": [
-          "  BAD.bad.lch=>BAD.fix.lch: Finished at block 9999 (0 BUG1s, 0 BUG2s, 0 BUG3s, 48 Time Tears, 0 unexpected header values)"
-        ],
-        "parameters": {
-          "base_dir": "/Users/crawford/_Work/Programming/lcheapo/lcheapo/tests",
-          "dryrun": false,
-          "forceTime": false,
-          "in_dir": "/Users/crawford/_Work/Programming/lcheapo/lcheapo/tests/data",
-          "input_files": [
-            "BAD.bad.lch"
-          ],
-          "out_dir": "/Users/crawford/_Work/Programming/lcheapo/lcheapo/tests",
-          "output_files": [
-            "BAD.fix.timetears.txt"
-          ],
-          "verbosity": 0
-        },
-        "return_code": -1,
-        "tools": []
-      }
-    }
-  ]
+    "steps": [
+        {
+            "application": {
+                "description": "Fix common bugs in LCHEAPO data files",
+                "name": "lcfix",
+                "version": "0.73.post2"
+            },
+            "execution": {
+                "command_line": "/Users/crawford/opt/anaconda3/envs/obspy/bin/lcfix -d /Users/crawford/_Work/Programming/lcheapo/lcheapo/tests -i data BAD.bad.lch",
+                "date": "2021-06-16T20:48:04",
+                "exit_status": -1,
+                "messages": [
+                    "  BAD.bad.lch=>BAD.fix.lch: Finished at block 9999 (0 BUG1s, 0 BUG2s, 0 BUG3s, 48 Time Tears, 0 unexpected header values)"
+                ],
+                "parameters": {
+                    "directory_paths": {
+                        "base": "/Users/crawford/_Work/Programming/lcheapo/lcheapo/tests",
+                        "input": "data",
+                        "output": "."
+                    },
+                    "dryrun": false,
+                    "forceTime": false,
+                    "input_files": [
+                        "BAD.bad.lch"
+                    ],
+                    "output_files": [
+                        "BAD.fix.timetears.txt"
+                    ],
+                    "verbosity": 0
+                },
+                "tools": []
+            }
+        }
+    ]
 }
