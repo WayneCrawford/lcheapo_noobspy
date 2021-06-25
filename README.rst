@@ -7,6 +7,10 @@ Python tools for processing LCHEAPO 2000 data files
 All tools except `lcdump` and `lcinfo` create/append to a process-steps file
 according to the SDPCHAIN rules
 
+If you want to plot the data, or convert to SeisCompData structure miniSEED files, go to lcheapo_obspy_
+
+.. _lcheapo_obspy: https://github.com/WayneCrawford/lcheapo_obspy
+
 Overview
 ======================
 
