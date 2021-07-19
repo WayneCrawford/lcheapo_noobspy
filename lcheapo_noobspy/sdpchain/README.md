@@ -27,12 +27,18 @@ the SDPCHAIN protocol, which includes:
 Classes
 ---------------------
 
-:ProcessSteps: object to hold information for a process-steps file
+`ProcessSteps` object to hold information for a process-steps file
 
 Command-line Routines
 ---------------------
 
 These routines perform common functions while following the
 SDPCHAIN rules (process-steps file, -i, -o, -d)
-:sdpstep: run a standard command-line program 
-:sdpcat: concatenate binary files
+
+`sdpstep`: run a standard command-line program 
+
+`sdpcat`: concatenate binary files
+
+ToDo
+----
+Add `sdpcode`: change net and station codes?

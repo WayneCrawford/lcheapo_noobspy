@@ -1,5 +1,5 @@
 ===================
-lcheapo
+lcheapo_noobspy
 ===================
 
 Python tools for processing LCHEAPO 2000 data files

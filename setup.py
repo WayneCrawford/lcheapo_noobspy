@@ -4,11 +4,11 @@ with open("README.rst", "r") as fh:
     long_description = fh.read()
     
 version={}
-with open("lcheapo/version.py") as fp:
+with open("lcheapo_noobspy/version.py") as fp:
     exec(fp.read(),version)
 
 setuptools.setup(
-    name="lcheapo",
+    name="lcheapo_noobspy",
     version=version['__version__'],
     author="Wayne Crawford (original code by Paul Georgief at UCSD-SIO)",
     author_email="crawford@ipgp.fr",

@@ -106,6 +106,10 @@ dirCount was.
   - 0.73.1: Heavy changes to underlying sdpchain module, should make more
             consistent and compatible process-steps.json files
 
+v1.0
+-------
+Name change from `lcheapo`, to `lcheapo_noobspy` (old `lcheapo` and
+`lcheapo_obspy` combined into current `lcheapo`)
 
 todo::
 - Make output file simply replace raw.lch (or orig.lch) by fix.lch
